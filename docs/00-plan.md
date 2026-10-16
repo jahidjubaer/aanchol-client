@@ -35,7 +35,7 @@ Brand name: **not final**. `Aanchol` (আঁচল) is used as a placeholder and
 
 ## Roadmap
 1. ✅ Client scaffold (see `01-client-setup.md`)
-2. Design system: tokens, buttons, motif dividers, product card, navbar and mobile drawer, footer
+2. ✅ Design system (see `02-design-system.md`)
 3. Pages with mock data: Home, Collection, Product, Our Story, Cart, Checkout, About, Contact
 4. Server: Express + MongoDB, with products, orders and admin auth
 5. Connect frontend to API; Cloudinary images
