@@ -23,7 +23,7 @@ function IconButton({ label, children, className = '', ...props }) {
 }
 
 export default function Navbar() {
-  const { count: cartCount } = useCart()
+  const { count: cartCount, openCart } = useCart()
   const [menuOpen, setMenuOpen] = useState(false)
   const scrolled = useScrolled()
 
@@ -85,7 +85,7 @@ export default function Navbar() {
             <IconButton label="Wishlist" className="hidden md:grid">
               <Heart {...iconProps} />
             </IconButton>
-            <IconButton label={`Cart, ${cartCount} items`} className="relative">
+            <IconButton label={`Cart, ${cartCount} items`} className="relative" onClick={openCart}>
               <ShoppingBag {...iconProps} />
               {cartCount > 0 && (
                 <span className="absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-primary text-[9px] text-primary-content">

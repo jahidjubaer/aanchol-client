@@ -1,0 +1,229 @@
+import { ChevronDown, Lock } from 'lucide-react'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+import OrderSummary from '../components/checkout/OrderSummary.jsx'
+import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
+import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
+import { useCart } from '../context/cart.js'
+import { makeOrderId, validateCheckout } from '../utils/checkout.js'
+import { formatPrice } from '../utils/formatPrice.js'
+
+const EMPTY_FORM = { name: '', phone: '', email: '', city: '', address: '', note: '', delivery: 'inside-dhaka' }
+
+function Field({ label, error, optional, children }) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-xs uppercase tracking-[0.15em]">
+        {label} {optional && <span className="normal-case tracking-normal opacity-50">(optional)</span>}
+      </span>
+      {children}
+      {error && <span className="mt-1 block text-xs text-error">{error}</span>}
+    </label>
+  )
+}
+
+function Section({ step, title, children }) {
+  return (
+    <section className="border-b border-base-300 py-8 first:pt-0">
+      <h2 className="flex items-baseline gap-3 text-2xl">
+        <span className="font-sans text-xs text-secondary">{step}</span> {title}
+      </h2>
+      <div className="mt-5">{children}</div>
+    </section>
+  )
+}
+
+export default function Checkout() {
+  const { items, subtotal, clear } = useCart()
+  const navigate = useNavigate()
+  const [form, setForm] = useState(EMPTY_FORM)
+  const [errors, setErrors] = useState({})
+  const [touched, setTouched] = useState(false)
+  const [summaryOpen, setSummaryOpen] = useState(false)
+
+  const delivery = DELIVERY_OPTIONS.find((d) => d.id === form.delivery)
+  const total = subtotal + delivery.fee
+
+  if (items.length === 0) {
+    return (
+      <div className="px-4 py-24 text-center">
+        <h1 className="text-4xl">Your bag is empty</h1>
+        <JamdaniDivider className="my-6" />
+        <Link to="/collections/jamdani" className="btn btn-primary px-8 uppercase tracking-[0.2em]">
+          Explore Jamdani
+        </Link>
+      </div>
+    )
+  }
+
+  const set = (key) => (e) => {
+    const next = { ...form, [key]: e.target.value }
+    setForm(next)
+    if (touched) setErrors(validateCheckout(next))
+  }
+
+  const submit = (e) => {
+    e.preventDefault()
+    const found = validateCheckout(form)
+    setErrors(found)
+    setTouched(true)
+    if (Object.keys(found).length) {
+      document.querySelector(`[name="${Object.keys(found)[0]}"]`)?.focus()
+      return
+    }
+    // No backend yet: the order is built here and handed to the confirmation page.
+    const order = {
+      id: makeOrderId(),
+      items: items.map((i) => ({ slug: i.slug, name: i.product.name, price: i.product.price, qty: i.qty })),
+      subtotal,
+      delivery,
+      total,
+      payment: 'Cash on delivery',
+      customer: { name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim(), city: form.city.trim(), address: form.address.trim(), note: form.note.trim() },
+    }
+    clear()
+    navigate('/order-confirmed', { state: { order }, replace: true })
+  }
+
+  const inputClass = (key) => `input w-full ${errors[key] ? 'input-error' : ''}`
+
+  return (
+    <>
+      <title>{`Checkout | ${BRAND.name}`}</title>
+
+      {/* Mobile: collapsible summary */}
+      <div className="border-b border-base-300 bg-base-200 lg:hidden">
+        <button
+          type="button"
+          onClick={() => setSummaryOpen((v) => !v)}
+          aria-expanded={summaryOpen}
+          className="flex w-full items-center justify-between px-4 py-4 text-sm"
+        >
+          <span className="flex items-center gap-2">
+            {summaryOpen ? 'Hide' : 'Show'} order summary
+            <ChevronDown size={16} className={`transition ${summaryOpen ? 'rotate-180' : ''}`} />
+          </span>
+          <span className="font-display text-xl">{formatPrice(total)}</span>
+        </button>
+        {summaryOpen && (
+          <div className="px-4 pb-4">
+            <OrderSummary items={items} subtotal={subtotal} delivery={delivery} />
+          </div>
+        )}
+      </div>
+
+      <div className="mx-auto max-w-6xl px-4 py-10 md:px-8 md:py-14">
+        <h1 className="text-4xl md:text-5xl">Checkout</h1>
+        <p className="mt-1 font-bangla text-primary">অর্ডার সম্পন্ন করুন</p>
+
+        <div className="mt-10 lg:grid lg:grid-cols-[1fr_380px] lg:gap-16">
+          <form onSubmit={submit} noValidate>
+            <Section step="01" title="Contact">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <Field label="Full name" error={errors.name}>
+                  <input name="name" autoComplete="name" value={form.name} onChange={set('name')} className={inputClass('name')} />
+                </Field>
+                <Field label="Mobile number" error={errors.phone}>
+                  <input
+                    name="phone"
+                    type="tel"
+                    inputMode="tel"
+                    autoComplete="tel"
+                    placeholder="01XXXXXXXXX"
+                    value={form.phone}
+                    onChange={set('phone')}
+                    className={inputClass('phone')}
+                  />
+                </Field>
+                <div className="sm:col-span-2">
+                  <Field label="Email" optional error={errors.email}>
+                    <input name="email" type="email" autoComplete="email" value={form.email} onChange={set('email')} className={inputClass('email')} />
+                  </Field>
+                </div>
+              </div>
+            </Section>
+
+            <Section step="02" title="Delivery">
+              <div className="grid gap-3 sm:grid-cols-2">
+                {DELIVERY_OPTIONS.map((opt) => (
+                  <label
+                    key={opt.id}
+                    className={`flex cursor-pointer items-start gap-3 border p-4 transition ${
+                      form.delivery === opt.id ? 'border-primary bg-primary/5' : 'border-base-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="delivery"
+                      value={opt.id}
+                      checked={form.delivery === opt.id}
+                      onChange={set('delivery')}
+                      className="radio radio-sm radio-primary mt-0.5"
+                    />
+                    <span className="flex-1">
+                      <span className="block text-sm">{opt.label}</span>
+                      <span className="block text-xs opacity-60">{opt.eta}</span>
+                    </span>
+                    <span className="text-sm">{opt.fee ? formatPrice(opt.fee) : 'Free'}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="mt-4 grid gap-4">
+                <Field label="City / District" error={errors.city}>
+                  <input name="city" autoComplete="address-level2" value={form.city} onChange={set('city')} className={inputClass('city')} />
+                </Field>
+                <Field label="Full address" error={errors.address}>
+                  <textarea
+                    name="address"
+                    autoComplete="street-address"
+                    rows={3}
+                    placeholder="House, road, area"
+                    value={form.address}
+                    onChange={set('address')}
+                    className={`textarea w-full ${errors.address ? 'textarea-error' : ''}`}
+                  />
+                </Field>
+                <Field label="Note for us" optional>
+                  <textarea name="note" rows={2} value={form.note} onChange={set('note')} className="textarea w-full" />
+                </Field>
+              </div>
+            </Section>
+
+            <Section step="03" title="Payment">
+              <div className="grid gap-3">
+                <label className="flex items-start gap-3 border border-primary bg-primary/5 p-4">
+                  <input type="radio" checked readOnly className="radio radio-sm radio-primary mt-0.5" />
+                  <span>
+                    <span className="block text-sm">Cash on delivery</span>
+                    <span className="block text-xs opacity-60">Pay in cash when your sari arrives.</span>
+                  </span>
+                </label>
+                <div className="flex items-center gap-3 border border-base-300 p-4 opacity-50">
+                  <input type="radio" disabled className="radio radio-sm" />
+                  <span className="text-sm">bKash · Nagad · Card</span>
+                  <span className="ml-auto text-[10px] uppercase tracking-[0.2em]">Coming soon</span>
+                </div>
+              </div>
+            </Section>
+
+            <div className="pt-8">
+              <button type="submit" className="btn btn-primary btn-block btn-lg uppercase tracking-[0.25em]">
+                Place order · {formatPrice(total)}
+              </button>
+              <p className="mt-3 flex items-center justify-center gap-2 text-xs opacity-60">
+                <Lock size={12} /> We'll call to confirm your order before dispatch.
+              </p>
+            </div>
+          </form>
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-32 bg-base-200 p-6">
+              <p className="eyebrow mb-2">Order summary</p>
+              <OrderSummary items={items} subtotal={subtotal} delivery={delivery} />
+            </div>
+          </aside>
+        </div>
+      </div>
+    </>
+  )
+}

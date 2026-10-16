@@ -1,6 +1,8 @@
 import { Check } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import CartDrawer from '../components/cart/CartDrawer.jsx'
+import { getProduct } from '../data/products.js'
 import { EASE_LUXE } from '../utils/motion.js'
 import { CartContext } from './cart.js'
 
@@ -18,6 +20,7 @@ function readStoredCart() {
 export default function CartProvider({ children }) {
   const [lines, setLines] = useState(readStoredCart)
   const [toast, setToast] = useState(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     try {
@@ -29,7 +32,7 @@ export default function CartProvider({ children }) {
 
   useEffect(() => {
     if (!toast) return
-    const timer = setTimeout(() => setToast(null), 2600)
+    const timer = setTimeout(() => setToast(null), 3200)
     return () => clearTimeout(timer)
   }, [toast])
 
@@ -45,19 +48,44 @@ export default function CartProvider({ children }) {
     setToast({ name: product.name, key: Date.now() })
   }, [])
 
-  const value = useMemo(
-    () => ({
+  const setQty = useCallback((slug, qty) => {
+    setLines((current) =>
+      qty < 1 ? current.filter((l) => l.slug !== slug) : current.map((l) => (l.slug === slug ? { ...l, qty } : l)),
+    )
+  }, [])
+
+  const removeItem = useCallback((slug) => setLines((current) => current.filter((l) => l.slug !== slug)), [])
+  const clear = useCallback(() => setLines([]), [])
+  const openCart = useCallback(() => {
+    setToast(null)
+    setDrawerOpen(true)
+  }, [])
+  const closeCart = useCallback(() => setDrawerOpen(false), [])
+
+  const value = useMemo(() => {
+    // Products that no longer exist are dropped silently.
+    const items = lines
+      .map((l) => ({ ...l, product: getProduct(l.slug) }))
+      .filter((l) => l.product)
+      .map((l) => ({ ...l, qty: Math.min(l.qty, l.product.stock) }))
+    return {
       lines,
-      count: lines.reduce((sum, l) => sum + l.qty, 0),
+      items,
+      count: items.reduce((sum, l) => sum + l.qty, 0),
+      subtotal: items.reduce((sum, l) => sum + l.qty * l.product.price, 0),
       addItem,
-      has: (slug) => lines.some((l) => l.slug === slug),
-    }),
-    [lines, addItem],
-  )
+      setQty,
+      removeItem,
+      clear,
+      openCart,
+      closeCart,
+    }
+  }, [lines, addItem, setQty, removeItem, clear, openCart, closeCart])
 
   return (
     <CartContext.Provider value={value}>
       {children}
+      <CartDrawer open={drawerOpen} onClose={closeCart} />
       <AnimatePresence>
         {toast && (
           <motion.div
@@ -70,9 +98,19 @@ export default function CartProvider({ children }) {
             transition={{ duration: 0.5, ease: EASE_LUXE }}
           >
             <Check size={18} className="shrink-0 text-gold-light" />
-            <span>
+            <span className="flex-1">
               <span className="font-display text-base">{toast.name}</span> added to your bag
             </span>
+            <button
+              type="button"
+              onClick={() => {
+                setToast(null)
+                openCart()
+              }}
+              className="shrink-0 text-xs uppercase tracking-[0.2em] text-gold-light underline underline-offset-4"
+            >
+              View
+            </button>
           </motion.div>
         )}
       </AnimatePresence>

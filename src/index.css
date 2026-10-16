@@ -42,8 +42,9 @@
 }
 
 @theme {
-  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
-  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  /* Tiro Bangla supplies glyphs these Latin fonts lack, such as the Taka sign. */
+  --font-display: "Cormorant Garamond", "Tiro Bangla", ui-serif, Georgia, serif;
+  --font-sans: "Jost", "Tiro Bangla", ui-sans-serif, system-ui, sans-serif;
   --font-bangla: "Tiro Bangla", serif;
 
   --color-gold: #b8892d;

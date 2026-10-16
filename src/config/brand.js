@@ -40,3 +40,9 @@ export const FOOTER_LINKS = [
 ]
 
 export const PAYMENT_METHODS = ['Cash on Delivery', 'bKash', 'Nagad', 'Cards']
+
+// Delivery charges in Taka (placeholders until confirmed).
+export const DELIVERY_OPTIONS = [
+  { id: 'inside-dhaka', label: 'Inside Dhaka', eta: '1–2 days', fee: 0 },
+  { id: 'outside-dhaka', label: 'Outside Dhaka', eta: '2–5 days', fee: 150 },
+]
