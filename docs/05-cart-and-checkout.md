@@ -40,6 +40,8 @@ _Date: 2026-10-17_
 Cormorant Garamond and Jost have no ৳ character, so prices used a mismatched fallback glyph. `Tiro Bangla` is now second in both font stacks, so ৳ renders consistently.
 
 ## ⚠️ Important limitation
+> **Update (06):** checkout now saves orders through the API. The note below describes the state before that.
+
 **Orders are not saved anywhere yet.** "Place order" only empties the cart and shows the confirmation. Orders reach you only if the customer taps **Send on WhatsApp**. Real order storage comes with the backend (Express + MongoDB). Don't launch publicly before then.
 
 ## Placeholders to confirm

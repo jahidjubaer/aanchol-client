@@ -14,10 +14,6 @@ export function validateCheckout(form) {
   return errors
 }
 
-export function makeOrderId() {
-  return `AN-${Date.now().toString(36).toUpperCase().slice(-6)}`
-}
-
 export function orderWhatsappMessage(order) {
   const lines = order.items.map((i) => `• ${i.name} × ${i.qty} = ${formatPrice(i.price * i.qty)}`)
   return [

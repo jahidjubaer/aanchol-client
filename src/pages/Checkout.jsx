@@ -1,12 +1,14 @@
-import { ChevronDown, Lock } from 'lucide-react'
-import { useState } from 'react'
+import { ChevronDown, CircleAlert, Lock, MessageCircle } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
 import { useCart } from '../context/cart.js'
-import { makeOrderId, validateCheckout } from '../utils/checkout.js'
+import { placeOrder } from '../utils/api.js'
+import { validateCheckout } from '../utils/checkout.js'
 import { formatPrice } from '../utils/formatPrice.js'
+import { whatsappLink } from '../utils/whatsapp.js'
 
 const EMPTY_FORM = { name: '', phone: '', email: '', city: '', address: '', note: '', delivery: 'inside-dhaka' }
 
@@ -34,12 +36,20 @@ function Section({ step, title, children }) {
 }
 
 export default function Checkout() {
-  const { items, subtotal, clear } = useCart()
+  const { items, subtotal, clear, setQty } = useCart()
   const navigate = useNavigate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formError, setFormError] = useState(null)
+  const errorRef = useRef(null)
+
+  // Server errors appear next to the button at the bottom; bring them into view.
+  useEffect(() => {
+    if (formError) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  }, [formError])
 
   const delivery = DELIVERY_OPTIONS.find((d) => d.id === form.delivery)
   const total = subtotal + delivery.fee
@@ -62,27 +72,37 @@ export default function Checkout() {
     if (touched) setErrors(validateCheckout(next))
   }
 
-  const submit = (e) => {
+  const submit = async (e) => {
     e.preventDefault()
+    if (submitting) return
     const found = validateCheckout(form)
     setErrors(found)
     setTouched(true)
+    setFormError(null)
     if (Object.keys(found).length) {
       document.querySelector(`[name="${Object.keys(found)[0]}"]`)?.focus()
       return
     }
-    // No backend yet: the order is built here and handed to the confirmation page.
-    const order = {
-      id: makeOrderId(),
-      items: items.map((i) => ({ slug: i.slug, name: i.product.name, price: i.product.price, qty: i.qty })),
-      subtotal,
-      delivery,
-      total,
-      payment: 'Cash on delivery',
-      customer: { name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim(), city: form.city.trim(), address: form.address.trim(), note: form.note.trim() },
+    setSubmitting(true)
+    try {
+      // The server checks stock and works out prices itself; only slugs and quantities are sent.
+      const order = await placeOrder({
+        customer: { name: form.name, phone: form.phone, email: form.email, city: form.city, address: form.address, note: form.note },
+        delivery: form.delivery,
+        items: items.map((i) => ({ slug: i.slug, qty: i.qty })),
+      })
+      clear()
+      navigate('/order-confirmed', { state: { order }, replace: true })
+    } catch (err) {
+      setSubmitting(false)
+      if (err.body.fields) setErrors(err.body.fields)
+      if (err.status === 409 && err.body.items) {
+        err.body.items.forEach((i) => setQty(i.slug, i.available))
+        setFormError(`${err.message} We've updated your bag; please check it and place the order again.`)
+      } else {
+        setFormError(err.message)
+      }
     }
-    clear()
-    navigate('/order-confirmed', { state: { order }, replace: true })
   }
 
   const inputClass = (key) => `input w-full ${errors[key] ? 'input-error' : ''}`
@@ -207,8 +227,34 @@ export default function Checkout() {
             </Section>
 
             <div className="pt-8">
-              <button type="submit" className="btn btn-primary btn-block btn-lg uppercase tracking-[0.25em]">
-                Place order · {formatPrice(total)}
+              {formError && (
+                <div ref={errorRef} role="alert" className="mb-4 flex gap-3 border border-error/40 bg-error/5 p-4 text-sm">
+                  <CircleAlert size={18} strokeWidth={1.5} className="mt-0.5 shrink-0 text-error" />
+                  <div>
+                    <p>{formError}</p>
+                    <a
+                      href={whatsappLink()}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-2 inline-flex items-center gap-1.5 text-xs uppercase tracking-[0.15em] text-accent underline underline-offset-4"
+                    >
+                      <MessageCircle size={14} strokeWidth={1.5} /> Or order on WhatsApp
+                    </a>
+                  </div>
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={submitting}
+                className="btn btn-primary btn-block btn-lg uppercase tracking-[0.25em]"
+              >
+                {submitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm" /> Placing order
+                  </>
+                ) : (
+                  <>Place order · {formatPrice(total)}</>
+                )}
               </button>
               <p className="mt-3 flex items-center justify-center gap-2 text-xs opacity-60">
                 <Lock size={12} /> We'll call to confirm your order before dispatch.

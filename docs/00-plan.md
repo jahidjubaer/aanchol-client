@@ -37,8 +37,8 @@ Brand name: **not final**. `Aanchol` (আঁচল) is used as a placeholder and
 1. ✅ Client scaffold (see `01-client-setup.md`)
 2. ✅ Design system (see `02-design-system.md`)
 3. Pages with mock data: ✅ Home (`03`) · ✅ Collection + Product (`04`) · ✅ Cart + Checkout (`05`) · Our Story · About · Contact
-4. Server: Express + MongoDB, with products, orders and admin auth
-5. Connect frontend to API; Cloudinary images
+4. Server: Express + MongoDB: ✅ products + orders API (`aanchol-server/docs/01`) · admin login + order management
+5. Connect frontend to API: ✅ checkout places real orders (`06`) · product pages from API · Cloudinary images
 6. Deploy (Vercel + Render) and connect the domain
 7. Payments: COD first, then bKash / SSLCommerz
 
