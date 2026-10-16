@@ -2,7 +2,7 @@ import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import MotifBand from '../components/ui/MotifBand.jsx'
 import ProductCard from '../components/ui/ProductCard.jsx'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
-import { products } from '../data/products.js'
+import { useCatalog } from '../context/catalog.js'
 
 const SWATCHES = [
   { name: 'Ivory', className: 'bg-base-100 border border-base-300', hex: '#FAF6EE' },
@@ -24,6 +24,7 @@ function Block({ title, children }) {
 
 // Internal preview of the design system. Not linked from the public navigation.
 export default function StyleGuide() {
+  const { products } = useCatalog()
   return (
     <div className="mx-auto max-w-7xl px-4 py-12 md:px-8">
       <SectionHeading eyebrow="Design System" title="Ivory & Gold Heritage" bangla="ঐতিহ্যের নকশা">

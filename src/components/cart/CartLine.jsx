@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { getSubtitle } from '../../data/products.js'
+import { getSubtitle } from '../../utils/product.js'
 import { formatPrice } from '../../utils/formatPrice.js'
 import WovenImage from '../ui/WovenImage.jsx'
 import QtyStepper from './QtyStepper.jsx'

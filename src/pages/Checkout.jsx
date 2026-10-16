@@ -36,7 +36,7 @@ function Section({ step, title, children }) {
 }
 
 export default function Checkout() {
-  const { items, subtotal, clear, setQty } = useCart()
+  const { items, lines, ready, subtotal, clear, setQty } = useCart()
   const navigate = useNavigate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
@@ -53,6 +53,14 @@ export default function Checkout() {
 
   const delivery = DELIVERY_OPTIONS.find((d) => d.id === form.delivery)
   const total = subtotal + delivery.fee
+
+  if (!ready && lines.length > 0) {
+    return (
+      <div className="grid place-items-center px-4 py-32" role="status" aria-label="Loading your bag">
+        <span className="loading loading-spinner" />
+      </div>
+    )
+  }
 
   if (items.length === 0) {
     return (

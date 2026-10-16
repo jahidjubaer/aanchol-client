@@ -4,9 +4,11 @@ import { useMemo, useState } from 'react'
 import { useParams, useSearchParams } from 'react-router'
 import FilterPanel from '../components/collection/FilterPanel.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
+import { CatalogNotice, ProductGridSkeleton } from '../components/ui/CatalogState.jsx'
 import ProductCard from '../components/ui/ProductCard.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import Sheet from '../components/ui/Sheet.jsx'
+import { useCatalog } from '../context/catalog.js'
 import { collections } from '../data/collections.js'
 import { EASE_LUXE } from '../utils/motion.js'
 import { applyFilters, getFilterOptions, PRICE_RANGES, SORT_OPTIONS } from '../utils/productFilters.js'
@@ -81,8 +83,9 @@ export default function Collection() {
   const collection = collections[slug]
   const [params, setParams] = useSearchParams()
   const [sheetOpen, setSheetOpen] = useState(false)
+  const { products, status } = useCatalog()
 
-  const allItems = useMemo(() => collection?.items() ?? [], [collection])
+  const allItems = useMemo(() => collection?.items(products) ?? [], [collection, products])
   const options = useMemo(() => getFilterOptions(allItems), [allItems])
   const filters = readFilters(params)
   const sort = params.get('sort') ?? 'featured'
@@ -130,7 +133,7 @@ export default function Collection() {
         {/* Toolbar */}
         <div className="flex items-center justify-between gap-3 border-b border-base-300 py-4">
           <p className="text-xs uppercase tracking-[0.2em] opacity-70">
-            {visible.length} {visible.length === 1 ? 'piece' : 'pieces'}
+            {status === 'ready' && `${visible.length} ${visible.length === 1 ? 'piece' : 'pieces'}`}
           </p>
           <div className="flex items-center gap-2">
             <button
@@ -186,7 +189,14 @@ export default function Collection() {
             </div>
           </aside>
 
-          {visible.length ? (
+          {status === 'error' ? (
+            <CatalogNotice className="py-20" />
+          ) : status === 'loading' ? (
+            <div>
+              <ProductGridSkeleton count={6} className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-3 md:gap-x-6" />
+              <CatalogNotice className="mt-10" />
+            </div>
+          ) : visible.length ? (
             <div className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-3 md:gap-x-6">
               {visible.map((product, i) => (
                 <Reveal key={product.slug} delay={(i % 3) * 0.08}>

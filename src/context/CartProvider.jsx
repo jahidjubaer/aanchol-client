@@ -2,7 +2,7 @@ import { Check } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import CartDrawer from '../components/cart/CartDrawer.jsx'
-import { getProduct } from '../data/products.js'
+import { useCatalog } from './catalog.js'
 import { EASE_LUXE } from '../utils/motion.js'
 import { CartContext } from './cart.js'
 
@@ -21,6 +21,7 @@ export default function CartProvider({ children }) {
   const [lines, setLines] = useState(readStoredCart)
   const [toast, setToast] = useState(null)
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { getProduct, status: catalogStatus } = useCatalog()
 
   useEffect(() => {
     try {
@@ -63,14 +64,16 @@ export default function CartProvider({ children }) {
   const closeCart = useCallback(() => setDrawerOpen(false), [])
 
   const value = useMemo(() => {
-    // Products that no longer exist are dropped silently.
+    // Products that no longer exist or have sold out are left out (the saved lines stay until the catalogue loads).
     const items = lines
       .map((l) => ({ ...l, product: getProduct(l.slug) }))
       .filter((l) => l.product)
       .map((l) => ({ ...l, qty: Math.min(l.qty, l.product.stock) }))
+      .filter((l) => l.qty > 0)
     return {
       lines,
       items,
+      ready: catalogStatus === 'ready',
       count: items.reduce((sum, l) => sum + l.qty, 0),
       subtotal: items.reduce((sum, l) => sum + l.qty * l.product.price, 0),
       addItem,
@@ -80,7 +83,7 @@ export default function CartProvider({ children }) {
       openCart,
       closeCart,
     }
-  }, [lines, addItem, setQty, removeItem, clear, openCart, closeCart])
+  }, [lines, getProduct, catalogStatus, addItem, setQty, removeItem, clear, openCart, closeCart])
 
   return (
     <CartContext.Provider value={value}>

@@ -2,7 +2,7 @@ import { Heart } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Link } from 'react-router'
-import { getSubtitle } from '../../data/products.js'
+import { getSubtitle, isSoldOut } from '../../utils/product.js'
 import { formatPrice } from '../../utils/formatPrice.js'
 import { EASE_LUXE } from '../../utils/motion.js'
 import WovenImage from './WovenImage.jsx'
@@ -11,13 +11,14 @@ export default function ProductCard({ product }) {
   const [liked, setLiked] = useState(false)
   const { slug, name, price, compareAt, badge, images, colors } = product
   const [image, hoverImage] = images
+  const soldOut = isSoldOut(product)
 
   return (
     <article className="group">
       <div className="relative aspect-[3/4] overflow-hidden bg-base-200">
         <Link to={`/products/${slug}`} aria-label={name}>
           <motion.div
-            className="relative size-full"
+            className={`relative size-full ${soldOut ? 'opacity-60 grayscale-[40%]' : ''}`}
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 1.2, ease: EASE_LUXE }}
           >
@@ -37,7 +38,11 @@ export default function ProductCard({ product }) {
           </motion.div>
         </Link>
 
-        {badge && (
+        {soldOut ? (
+          <span className="absolute left-0 top-3 bg-neutral px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-content md:left-3">
+            Sold out
+          </span>
+        ) : badge && (
           <span className="absolute left-0 top-3 bg-base-100/95 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] md:left-3">
             {badge}
           </span>

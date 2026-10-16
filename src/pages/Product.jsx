@@ -3,15 +3,18 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import ProductGallery from '../components/product/ProductGallery.jsx'
 import StickyBuyBar from '../components/product/StickyBuyBar.jsx'
+import { CatalogNotice } from '../components/ui/CatalogState.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import ProductCard from '../components/ui/ProductCard.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
 import { BRAND } from '../config/brand.js'
+import { JAMDANI_SPECS } from '../config/jamdani.js'
 import { useCart } from '../context/cart.js'
+import { useCatalog } from '../context/catalog.js'
 import { collections } from '../data/collections.js'
-import { getProduct, JAMDANI_SPECS, products } from '../data/products.js'
 import { formatPrice } from '../utils/formatPrice.js'
+import { isSoldOut } from '../utils/product.js'
 import { productWhatsappMessage, whatsappLink } from '../utils/whatsapp.js'
 import NotFound from './NotFound.jsx'
 
@@ -58,21 +61,46 @@ function useOutOfView(ref) {
   return outOfView
 }
 
+function ProductSkeleton({ failed }) {
+  if (failed) return <CatalogNotice className="px-4 py-32" />
+  return (
+    <div className="mx-auto max-w-7xl px-4 pb-16 md:px-8 md:pt-8" role="status" aria-label="Loading">
+      <div className="md:grid md:grid-cols-[1.15fr_1fr] md:gap-12 lg:gap-20">
+        <div className="-mx-4 aspect-[3/4] animate-pulse bg-base-200 md:mx-0" />
+        <div className="pt-6 md:pt-0">
+          <div className="h-3 w-32 animate-pulse bg-base-200" />
+          <div className="mt-6 h-10 w-4/5 animate-pulse bg-base-200" />
+          <div className="mt-3 h-4 w-1/3 animate-pulse bg-base-200" />
+          <div className="mt-6 h-6 w-1/4 animate-pulse bg-base-200" />
+          <div className="mt-8 h-24 animate-pulse bg-base-200" />
+          <div className="mt-8 h-12 animate-pulse bg-base-200" />
+          <CatalogNotice className="mt-8" />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Product() {
   const { slug } = useParams()
+  const { products, status, getProduct } = useCatalog()
   const product = getProduct(slug)
   const cart = useCart()
   const buyRef = useRef(null)
   const showStickyBar = useOutOfView(buyRef)
 
+  if (!product && status !== 'ready') return <ProductSkeleton failed={status === 'error'} />
   if (!product) return <NotFound />
 
   const collection = collections[product.category]
   const inCart = cart.lines.find((l) => l.slug === product.slug)?.qty ?? 0
-  const soldOutForYou = inCart >= product.stock
-  const addLabel = soldOutForYou ? 'In your bag' : 'Add to bag'
+  const soldOut = isSoldOut(product)
+  const soldOutForYou = soldOut || inCart >= product.stock
+  const addLabel = soldOut ? 'Sold out' : soldOutForYou ? 'In your bag' : 'Add to bag'
   const waHref = whatsappLink(productWhatsappMessage(product))
-  const related = products.filter((p) => p.category === product.category && p.slug !== product.slug).slice(0, 4)
+  const related = products
+    .filter((p) => p.category === product.category && p.slug !== product.slug && !isSoldOut(p))
+    .slice(0, 4)
 
   const add = () => !soldOutForYou && cart.addItem(product)
 
@@ -107,7 +135,11 @@ export default function Product() {
                 )}
               </p>
               <p className="mt-1 text-xs tracking-wide opacity-60">
-                {product.stock === 1 ? 'One of a kind · only 1 available' : `Only ${product.stock} available`}
+                {soldOut
+                  ? 'Sold out · message us on WhatsApp for a similar piece'
+                  : product.stock === 1
+                    ? 'One of a kind · only 1 available'
+                    : `Only ${product.stock} available`}
               </p>
 
               <JamdaniDivider className="my-6 justify-start" />
