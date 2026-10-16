@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@plugin "daisyui" {
+  themes: false;
+}
+
+/* Ivory & Gold Heritage theme */
+@plugin "daisyui/theme" {
+  name: "heritage";
+  default: true;
+  color-scheme: light;
+
+  --color-base-100: #faf6ee; /* ivory */
+  --color-base-200: #f3ebdd;
+  --color-base-300: #e8dcc6;
+  --color-base-content: #2b1d16; /* deep brown ink */
+
+  --color-primary: #7a1f2b; /* maroon */
+  --color-primary-content: #faf6ee;
+  --color-secondary: #b8892d; /* antique gold */
+  --color-secondary-content: #2b1d16;
+  --color-accent: #1f4d3a; /* bottle green */
+  --color-accent-content: #faf6ee;
+  --color-neutral: #2b1d16;
+  --color-neutral-content: #faf6ee;
+
+  --color-info: #2f5d7c;
+  --color-info-content: #faf6ee;
+  --color-success: #3e6b48;
+  --color-success-content: #faf6ee;
+  --color-warning: #c08a2e;
+  --color-warning-content: #2b1d16;
+  --color-error: #9b2c2c;
+  --color-error-content: #faf6ee;
+
+  --radius-selector: 0rem;
+  --radius-field: 0.125rem;
+  --radius-box: 0.25rem;
+  --border: 1px;
+  --depth: 0;
+  --noise: 0;
+}
+
+@theme {
+  --font-display: "Cormorant Garamond", ui-serif, Georgia, serif;
+  --font-sans: "Jost", ui-sans-serif, system-ui, sans-serif;
+  --font-bangla: "Tiro Bangla", serif;
+
+  --color-gold: #b8892d;
+  --color-gold-light: #d9b56a;
+  --color-maroon: #7a1f2b;
+  --color-ivory: #faf6ee;
+  --color-ink: #2b1d16;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-base-100 text-base-content font-sans font-light antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-display font-medium tracking-wide;
+  }
+}
+
+@layer components {
+  /* Small uppercase label used above headings */
+  .eyebrow {
+    @apply font-sans text-xs uppercase tracking-[0.3em] text-secondary;
+  }
+
+  /* Thin gold rule with a diamond, a light Jamdani nod */
+  .gold-rule {
+    @apply relative mx-auto h-px w-32 bg-gold/60;
+  }
+  .gold-rule::after {
+    content: "";
+    @apply absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gold;
+  }
+}
