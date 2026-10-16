@@ -1,8 +1,13 @@
 import { LogOut, Store } from 'lucide-react'
-import { Link, Navigate, Outlet, ScrollRestoration, useLocation } from 'react-router'
+import { Link, Navigate, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router'
 import { BRAND } from '../config/brand.js'
 import { useAdminAuth } from '../context/adminAuth.js'
 import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
+
+const SECTIONS = [
+  { to: '/admin', label: 'Orders', match: (p) => p === '/admin' || p.startsWith('/admin/orders') },
+  { to: '/admin/products', label: 'Products', match: (p) => p.startsWith('/admin/products') },
+]
 
 function AdminShell() {
   const { admin, logout } = useAdminAuth()
@@ -39,6 +44,19 @@ function AdminShell() {
               </button>
             </div>
           </div>
+          <nav className="mx-auto flex max-w-5xl gap-6 px-4 md:px-8" aria-label="Admin sections">
+            {SECTIONS.map((s) => (
+              <NavLink
+                key={s.to}
+                to={s.to}
+                className={`border-b-2 pb-2 text-xs uppercase tracking-[0.2em] transition ${
+                  s.match(location.pathname) ? 'border-primary text-primary' : 'border-transparent opacity-60 hover:opacity-100'
+                }`}
+              >
+                {s.label}
+              </NavLink>
+            ))}
+          </nav>
         </header>
       )}
       <main className="flex-1">

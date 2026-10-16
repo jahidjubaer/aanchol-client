@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Link } from 'react-router'
 import { getSubtitle, isSoldOut } from '../../utils/product.js'
 import { formatPrice } from '../../utils/formatPrice.js'
+import { imageSrc, imageSrcSet } from '../../utils/image.js'
 import { EASE_LUXE } from '../../utils/motion.js'
 import WovenImage from './WovenImage.jsx'
 
@@ -23,13 +24,20 @@ export default function ProductCard({ product }) {
             transition={{ duration: 1.2, ease: EASE_LUXE }}
           >
             {image ? (
-              <img src={image} alt={name} loading="lazy" className="size-full object-cover" />
+              <img
+                src={imageSrc(image, 500)}
+                srcSet={imageSrcSet(image, 500)}
+                alt={name}
+                loading="lazy"
+                className="size-full object-cover"
+              />
             ) : (
               <WovenImage base={colors.base} motif={colors.motif} />
             )}
             {hoverImage && (
               <img
-                src={hoverImage}
+                src={imageSrc(hoverImage, 500)}
+                srcSet={imageSrcSet(hoverImage, 500)}
                 alt=""
                 loading="lazy"
                 className="absolute inset-0 hidden size-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 md:block"

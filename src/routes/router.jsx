@@ -35,6 +35,9 @@ export const router = createBrowserRouter([
       { index: true, lazy: lazyPage(() => import('../pages/admin/AdminOrders.jsx')) },
       { path: 'login', lazy: lazyPage(() => import('../pages/admin/AdminLogin.jsx')) },
       { path: 'orders/:id', lazy: lazyPage(() => import('../pages/admin/AdminOrder.jsx')) },
+      { path: 'products', lazy: lazyPage(() => import('../pages/admin/AdminProducts.jsx')) },
+      { path: 'products/new', lazy: lazyPage(() => import('../pages/admin/AdminProductEdit.jsx')) },
+      { path: 'products/:slug', lazy: lazyPage(() => import('../pages/admin/AdminProductEdit.jsx')) },
     ],
   },
 ])

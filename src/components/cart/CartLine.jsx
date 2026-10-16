@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
-import { getSubtitle } from '../../utils/product.js'
 import { formatPrice } from '../../utils/formatPrice.js'
+import { imageSrc, imageSrcSet } from '../../utils/image.js'
+import { getSubtitle } from '../../utils/product.js'
 import WovenImage from '../ui/WovenImage.jsx'
 import QtyStepper from './QtyStepper.jsx'
 
@@ -17,7 +18,7 @@ export default function CartLine({ item, onQty, onRemove, onNavigate, compact = 
         className={`relative shrink-0 overflow-hidden bg-base-200 ${compact ? 'h-20 w-16' : 'h-28 w-21'}`}
       >
         {image ? (
-          <img src={image} alt={product.name} className="size-full object-cover" />
+          <img src={imageSrc(image, 160)} srcSet={imageSrcSet(image, 160)} alt={product.name} className="size-full object-cover" />
         ) : (
           <WovenImage base={product.colors.base} motif={product.colors.motif} />
         )}

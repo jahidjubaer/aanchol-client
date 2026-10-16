@@ -1,9 +1,16 @@
 import { useRef, useState } from 'react'
+import { imageSrc, imageSrcSet } from '../../utils/image.js'
 import WovenImage from '../ui/WovenImage.jsx'
 
 function Slide({ src, alt, colors, eager }) {
   return src ? (
-    <img src={src} alt={alt} loading={eager ? 'eager' : 'lazy'} className="size-full object-cover" />
+    <img
+      src={imageSrc(src, 900)}
+      srcSet={imageSrcSet(src, 900)}
+      alt={alt}
+      loading={eager ? 'eager' : 'lazy'}
+      className="size-full object-cover"
+    />
   ) : (
     <WovenImage base={colors.base} motif={colors.motif} />
   )
