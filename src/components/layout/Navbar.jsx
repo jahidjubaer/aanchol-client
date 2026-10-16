@@ -2,6 +2,7 @@ import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND, NAV_LINKS } from '../../config/brand.js'
+import { useCart } from '../../context/cart.js'
 import { useScrolled } from '../../hooks/useScrolled.js'
 import MotifBand from '../ui/MotifBand.jsx'
 import MobileMenu from './MobileMenu.jsx'
@@ -21,7 +22,8 @@ function IconButton({ label, children, className = '', ...props }) {
   )
 }
 
-export default function Navbar({ cartCount = 0 }) {
+export default function Navbar() {
+  const { count: cartCount } = useCart()
   const [menuOpen, setMenuOpen] = useState(false)
   const scrolled = useScrolled()
 
@@ -85,9 +87,11 @@ export default function Navbar({ cartCount = 0 }) {
             </IconButton>
             <IconButton label={`Cart, ${cartCount} items`} className="relative">
               <ShoppingBag {...iconProps} />
-              <span className="absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-primary text-[9px] text-primary-content">
-                {cartCount}
-              </span>
+              {cartCount > 0 && (
+                <span className="absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-primary text-[9px] text-primary-content">
+                  {cartCount}
+                </span>
+              )}
             </IconButton>
           </div>
         </nav>

@@ -2,13 +2,15 @@ import { Heart } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import { getSubtitle } from '../../data/products.js'
 import { formatPrice } from '../../utils/formatPrice.js'
 import { EASE_LUXE } from '../../utils/motion.js'
 import WovenImage from './WovenImage.jsx'
 
 export default function ProductCard({ product }) {
   const [liked, setLiked] = useState(false)
-  const { slug, name, subtitle, price, compareAt, badge, image, hoverImage, colors } = product
+  const { slug, name, price, compareAt, badge, images, colors } = product
+  const [image, hoverImage] = images
 
   return (
     <article className="group">
@@ -65,7 +67,7 @@ export default function ProductCard({ product }) {
             {name}
           </Link>
         </h3>
-        {subtitle && <p className="mt-0.5 text-xs tracking-wide opacity-60 md:text-sm">{subtitle}</p>}
+        <p className="mt-0.5 text-xs tracking-wide opacity-60 md:text-sm">{getSubtitle(product)}</p>
         <p className="mt-1.5 text-sm md:text-base">
           <span className="font-normal">{formatPrice(price)}</span>
           {compareAt && <span className="ml-2 text-xs line-through opacity-50">{formatPrice(compareAt)}</span>}
