@@ -3,7 +3,7 @@ export const BRAND = {
   name: 'Aanchol',
   nameBangla: 'আঁচল',
   tagline: 'Handwoven Heritage',
-  announcement: 'Cash on delivery across Bangladesh · Free delivery inside Dhaka',
+  announcement: ['Cash on delivery across Bangladesh', 'Free delivery inside Dhaka'],
   phone: '+880 1XXX-XXXXXX',
   whatsapp: '8801XXXXXXXXX',
   socials: [
@@ -34,6 +34,7 @@ export const FOOTER_LINKS = [
       { label: 'Returns & Exchange', to: '/returns' },
       { label: 'Jamdani Care Guide', to: '/care' },
       { label: 'Contact Us', to: '/contact' },
+      { label: 'Photo Credits', to: '/credits' },
     ],
   },
 ]

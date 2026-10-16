@@ -8,14 +8,14 @@ import WovenImage from './WovenImage.jsx'
 
 export default function ProductCard({ product }) {
   const [liked, setLiked] = useState(false)
-  const { slug, name, subtitle, price, compareAt, badge, image, colors } = product
+  const { slug, name, subtitle, price, compareAt, badge, image, hoverImage, colors } = product
 
   return (
     <article className="group">
       <div className="relative aspect-[3/4] overflow-hidden bg-base-200">
         <Link to={`/products/${slug}`} aria-label={name}>
           <motion.div
-            className="size-full"
+            className="relative size-full"
             whileHover={{ scale: 1.05 }}
             transition={{ duration: 1.2, ease: EASE_LUXE }}
           >
@@ -23,6 +23,14 @@ export default function ProductCard({ product }) {
               <img src={image} alt={name} loading="lazy" className="size-full object-cover" />
             ) : (
               <WovenImage base={colors.base} motif={colors.motif} />
+            )}
+            {hoverImage && (
+              <img
+                src={hoverImage}
+                alt=""
+                loading="lazy"
+                className="absolute inset-0 hidden size-full object-cover opacity-0 transition-opacity duration-700 group-hover:opacity-100 md:block"
+              />
             )}
           </motion.div>
         </Link>

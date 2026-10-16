@@ -1,0 +1,60 @@
+// Temporary photos from Wikimedia Commons. CC BY-SA requires visible credit,
+// shown on /credits. Remove entries as real product photos replace them.
+export const photoCredits = [
+  {
+    file: 'hero-loom-red.jpg',
+    title: 'Making of Jamdani-9',
+    author: 'Kamrul.vb',
+    license: 'CC BY-SA 3.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=18757174',
+  },
+  {
+    file: 'craft-hands-weaving.jpg',
+    title: 'Weaving jamdani at BSCIC Jamdani palli, Narayanganj 113',
+    author: 'Wasiul Bahar',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=130634868',
+  },
+  {
+    file: 'jamdani-red-on-loom.jpg',
+    title: 'Weaving jamdani at BSCIC Jamdani palli, Narayanganj 102',
+    author: 'Wasiul Bahar',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=130634126',
+  },
+  {
+    file: 'jamdani-ash-red.jpg',
+    title: 'Jamdani DSC 0500',
+    author: 'Atudu',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=46842532',
+  },
+  {
+    file: 'jamdani-ash-red-detail.jpg',
+    title: 'Jamdani DSC 0503',
+    author: 'Atudu',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=46842531',
+  },
+  {
+    file: 'jamdani-yellow.jpg',
+    title: 'Jamdani Saree Sale Sonargaon',
+    author: 'Armanaziz',
+    license: 'CC BY-SA 3.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=5886403',
+  },
+  {
+    file: 'jamdani-rainbow.jpg',
+    title: 'Jamdani shop at BSCIC Jamdani palli, Narayanganj 5',
+    author: 'Wasiul Bahar',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=130634827',
+  },
+  {
+    file: 'category-jamdani.jpg',
+    title: 'Jamdani Saree shop in Sonargaon',
+    author: 'Fahad Faisal',
+    license: 'CC BY-SA 4.0',
+    source: 'https://commons.wikimedia.org/w/index.php?curid=54718914',
+  },
+]

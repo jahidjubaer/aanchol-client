@@ -28,7 +28,8 @@ export default function Navbar({ cartCount = 0 }) {
   return (
     <>
       <div className="bg-primary px-4 py-2 text-center text-[11px] tracking-[0.15em] text-primary-content md:text-xs">
-        {BRAND.announcement}
+        {BRAND.announcement[0]}
+        <span className="hidden sm:inline"> · {BRAND.announcement[1]}</span>
       </div>
 
       <header

@@ -85,3 +85,19 @@
     @apply absolute left-1/2 top-1/2 size-2 -translate-x-1/2 -translate-y-1/2 rotate-45 bg-gold;
   }
 }
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* Unlayered so it wins over DaisyUI's bold button text: lighter type reads as more refined. */
+.btn {
+  font-family: var(--font-sans);
+  font-weight: 400;
+  font-size: 0.75rem;
+}
