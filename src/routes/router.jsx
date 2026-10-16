@@ -9,6 +9,9 @@ import OrderConfirmed from '../pages/OrderConfirmed.jsx'
 import Product from '../pages/Product.jsx'
 import StyleGuide from '../pages/StyleGuide.jsx'
 
+// Admin pages load separately, so shoppers never download them.
+const lazyPage = (load) => async () => ({ Component: (await load()).default })
+
 export const router = createBrowserRouter([
   {
     path: '/',
@@ -23,6 +26,15 @@ export const router = createBrowserRouter([
       { path: 'style-guide', element: <StyleGuide /> },
       { path: 'credits', element: <Credits /> },
       { path: '*', element: <NotFound /> },
+    ],
+  },
+  {
+    path: '/admin',
+    lazy: lazyPage(() => import('../layouts/AdminLayout.jsx')),
+    children: [
+      { index: true, lazy: lazyPage(() => import('../pages/admin/AdminOrders.jsx')) },
+      { path: 'login', lazy: lazyPage(() => import('../pages/admin/AdminLogin.jsx')) },
+      { path: 'orders/:id', lazy: lazyPage(() => import('../pages/admin/AdminOrder.jsx')) },
     ],
   },
 ])

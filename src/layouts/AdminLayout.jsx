@@ -1,0 +1,58 @@
+import { LogOut, Store } from 'lucide-react'
+import { Link, Navigate, Outlet, ScrollRestoration, useLocation } from 'react-router'
+import { BRAND } from '../config/brand.js'
+import { useAdminAuth } from '../context/adminAuth.js'
+import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
+
+function AdminShell() {
+  const { admin, logout } = useAdminAuth()
+  const location = useLocation()
+  const onLogin = location.pathname === '/admin/login'
+
+  if (!admin && !onLogin) {
+    const next = encodeURIComponent(location.pathname + location.search)
+    return <Navigate to={`/admin/login?next=${next}`} replace />
+  }
+
+  return (
+    <div className="flex min-h-dvh flex-col bg-base-200/60">
+      <meta name="robots" content="noindex, nofollow" />
+      {admin && (
+        <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur">
+          <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4 md:px-8">
+            <Link to="/admin" className="flex items-baseline gap-3">
+              <span className="font-display text-xl uppercase tracking-[0.25em]">{BRAND.name}</span>
+              <span className="text-[10px] uppercase tracking-[0.25em] text-secondary">Admin</span>
+            </Link>
+            <div className="flex items-center gap-1">
+              <span className="mr-2 hidden text-xs opacity-60 sm:inline">{admin.name}</span>
+              <Link to="/" aria-label="View shop" className="grid size-10 place-items-center transition hover:text-primary">
+                <Store size={18} strokeWidth={1.4} />
+              </Link>
+              <button
+                type="button"
+                onClick={logout}
+                aria-label="Log out"
+                className="grid size-10 place-items-center transition hover:text-primary"
+              >
+                <LogOut size={18} strokeWidth={1.4} />
+              </button>
+            </div>
+          </div>
+        </header>
+      )}
+      <main className="flex-1">
+        <Outlet />
+      </main>
+      <ScrollRestoration />
+    </div>
+  )
+}
+
+export default function AdminLayout() {
+  return (
+    <AdminAuthProvider>
+      <AdminShell />
+    </AdminAuthProvider>
+  )
+}

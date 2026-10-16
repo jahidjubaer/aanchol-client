@@ -9,7 +9,7 @@ export class ApiError extends Error {
   }
 }
 
-async function request(path, options = {}) {
+export async function request(path, options = {}) {
   let res
   try {
     res = await fetch(`${API_URL}${path}`, {
