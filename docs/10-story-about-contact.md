@@ -37,10 +37,10 @@ The shop itself: who we are and how buying works.
 ## Placeholders to confirm
 | What | Where | Now |
 | --- | --- | --- |
-| WhatsApp, phone | `BRAND.whatsapp`, `BRAND.phone` | `8801XXXXXXXXX` |
-| Email | `BRAND.email` | `hello@aanchol.com` (needs the domain) |
+| WhatsApp, phone | `BRAND.whatsapp`, `BRAND.phone` | `+880 1123-456789` (fake: the 011 range is unused in Bangladesh) |
+| Email | `BRAND.email` | `hello@aanchol.com` (made up; needs your domain) |
 | Hours | `BRAND.hours` | Every day, 10am to 8pm |
-| Facebook / Instagram pages | `BRAND.socials` | facebook.com / instagram.com |
+| Facebook / Instagram pages | `BRAND.socials` | `aanchol.bd` (made up; may belong to someone else) |
 | Exchange rule | `EXCHANGE_POLICY` | 3 days, unworn, with tags |
 | Delivery fees | `DELIVERY_OPTIONS` | Dhaka free, outside ৳150 |
 | Photos | `public/images/placeholder` | Wikimedia photos (credited on `/credits`) |

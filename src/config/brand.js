@@ -6,13 +6,15 @@ export const BRAND = {
   // What the name means, shown on the About page. Rewrite if the name changes.
   meaning: 'is the loose end of a sari, the part that falls over the shoulder and carries its finest weaving.',
   announcement: ['Cash on delivery across Bangladesh', 'Free delivery inside Dhaka'],
-  phone: '+880 1XXX-XXXXXX',
-  whatsapp: '8801XXXXXXXXX',
-  email: 'hello@aanchol.com', // placeholder until the domain is bought
-  hours: 'Every day, 10am to 8pm', // placeholder: when WhatsApp and calls are answered
+  // PLACEHOLDER contact details, replace before launch. The 011 range has no active
+  // operator in Bangladesh, so these numbers can't reach a real person by mistake.
+  phone: '+880 1123-456789',
+  whatsapp: '8801123456789',
+  email: 'hello@aanchol.com',
+  hours: 'Every day, 10am to 8pm',
   socials: [
-    { label: 'Facebook', href: 'https://facebook.com/' },
-    { label: 'Instagram', href: 'https://instagram.com/' },
+    { label: 'Facebook', href: 'https://facebook.com/aanchol.bd' },
+    { label: 'Instagram', href: 'https://instagram.com/aanchol.bd' },
   ],
 }
 
