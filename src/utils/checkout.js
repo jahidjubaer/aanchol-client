@@ -19,8 +19,11 @@ export function orderWhatsappMessage(order) {
   return [
     `Hello ${BRAND.name}, I placed order ${order.id}.`,
     ...lines,
+    ...(order.member ? [`${order.member.tier} member ${order.member.percent}%: −${formatPrice(order.member.discount)}`] : []),
     `Delivery: ${order.delivery.label} (${formatPrice(order.delivery.fee)})`,
-    `Total: ${formatPrice(order.total)} · Cash on delivery`,
+    ...(order.giftWrap ? [`Gift wrap (${formatPrice(order.giftWrap.fee)})${order.giftWrap.message ? `: "${order.giftWrap.message}"` : ''}`] : []),
+    ...(order.giftCard ? [`Gift card: −${formatPrice(order.giftCard.amount)}`] : []),
+    `${order.giftCard ? 'To pay' : 'Total'}: ${formatPrice(order.total)} · Cash on delivery`,
     `Name: ${order.customer.name}`,
     `Phone: ${order.customer.phone}`,
     `Address: ${order.customer.address}, ${order.customer.city}`,

@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, RefreshCw, Search } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Gift, RefreshCw, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import SampleBadge from '../../components/admin/SampleBadge.jsx'
@@ -35,6 +35,11 @@ function OrderRow({ order }) {
             <span className="text-sm tracking-[0.12em]">{order.id}</span>
             <StatusBadge status={order.status} />
             {order.sample && <SampleBadge />}
+            {order.giftWrap && (
+              <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-secondary">
+                <Gift size={12} strokeWidth={1.5} /> Gift wrap
+              </span>
+            )}
           </div>
           <p className="mt-1.5 truncate">{order.customer.name}</p>
           <p className="truncate text-xs opacity-60">

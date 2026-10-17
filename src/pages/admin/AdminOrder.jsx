@@ -1,8 +1,9 @@
-import { ArrowLeft, Check, MessageCircle, Phone } from 'lucide-react'
+import { ArrowLeft, Check, Gift, MessageCircle, Phone } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
 import SampleBadge from '../../components/admin/SampleBadge.jsx'
 import StatusBadge from '../../components/admin/StatusBadge.jsx'
+import OrderExtras from '../../components/checkout/OrderExtras.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAdminAuth } from '../../context/adminAuth.js'
 import { useAdminData } from '../../hooks/useAdminData.js'
@@ -15,6 +16,7 @@ import {
   timeAgo,
 } from '../../utils/adminFormat.js'
 import { formatPrice } from '../../utils/formatPrice.js'
+import { paymentNote } from '../../utils/orderTotals.js'
 
 function Card({ title, children, className = '' }) {
   return (
@@ -210,6 +212,18 @@ export default function AdminOrder() {
               <p>{customer.note}</p>
             </div>
           )}
+          {order.giftWrap && (
+            <div className="mt-4 border border-gold/60 bg-gold/10 p-3 text-sm">
+              <p className="eyebrow mb-1 flex items-center gap-2">
+                <Gift size={14} strokeWidth={1.5} /> Gift wrap · leave prices out
+              </p>
+              {order.giftWrap.message ? (
+                <p className="font-display text-lg italic">Write on the card: “{order.giftWrap.message}”</p>
+              ) : (
+                <p className="opacity-70">No message for the card.</p>
+              )}
+            </div>
+          )}
         </Card>
 
         <Card title="Items">
@@ -240,15 +254,17 @@ export default function AdminOrder() {
                 <dd>{order.campaign.percentOff}% off applied</dd>
               </div>
             )}
+            <OrderExtras order={{ member: order.member }} />
             <div className="flex justify-between opacity-70">
               <dt>Delivery · {order.delivery.label}</dt>
               <dd>{order.delivery.fee ? formatPrice(order.delivery.fee) : 'Free'}</dd>
             </div>
+            <OrderExtras order={{ giftWrap: order.giftWrap, giftCard: order.giftCard }} />
             <div className="mt-2 flex items-end justify-between">
               <dt>
-                <span className="eyebrow block text-base-content">Total</span>
+                <span className="eyebrow block text-base-content">{order.giftCard ? 'Collect' : 'Total'}</span>
                 <span className="text-xs opacity-60">
-                  Cash on delivery · {order.payment.paid ? 'Paid' : 'Not paid yet'}
+                  {paymentNote(order)} · {order.payment.paid || order.total === 0 ? 'Paid' : 'Not paid yet'}
                 </span>
               </dt>
               <dd className="font-display text-2xl">{formatPrice(order.total)}</dd>

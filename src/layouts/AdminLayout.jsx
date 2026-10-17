@@ -4,15 +4,44 @@ import { LogoMark } from '../components/ui/Logo.jsx'
 import { BRAND } from '../config/brand.js'
 import { useAdminAuth } from '../context/adminAuth.js'
 import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
+import { useAdminData } from '../hooks/useAdminData.js'
 
 const SECTIONS = [
   { to: '/admin', label: 'Orders', match: (p) => p === '/admin' || p.startsWith('/admin/orders') },
   { to: '/admin/products', label: 'Products', match: (p) => p.startsWith('/admin/products') },
   { to: '/admin/customers', label: 'Customers', match: (p) => p.startsWith('/admin/customers') },
+  { to: '/admin/gift-cards', label: 'Gift cards', badge: 'giftCards', match: (p) => p.startsWith('/admin/gift-cards') },
+  { to: '/admin/restock', label: 'Restock', badge: 'restock', match: (p) => p.startsWith('/admin/restock') },
+  { to: '/admin/rewards', label: 'Rewards', match: (p) => p.startsWith('/admin/rewards') },
   { to: '/admin/home', label: 'Home page', match: (p) => p.startsWith('/admin/home') },
   { to: '/admin/campaigns', label: 'Campaigns', match: (p) => p.startsWith('/admin/campaigns') },
   { to: '/admin/categories', label: 'Categories', match: (p) => p.startsWith('/admin/categories') },
 ]
+
+// Tabs, with counts of what needs doing: gift cards waiting for payment, people to tell about restocks.
+// Checked again on every page change.
+function SectionTabs() {
+  const location = useLocation()
+  const { data: badges } = useAdminData(`/api/admin/badges?page=${encodeURIComponent(location.pathname)}`)
+  return (
+    <nav className="mx-auto flex max-w-5xl gap-6 overflow-x-auto px-4 [scrollbar-width:none] md:px-8" aria-label="Admin sections">
+      {SECTIONS.map((s) => (
+        <NavLink
+          key={s.to}
+          to={s.to}
+          className={`flex shrink-0 items-center gap-1.5 border-b-2 pb-2 text-xs uppercase tracking-[0.2em] transition ${
+            s.match(location.pathname) ? 'border-primary text-primary' : 'border-transparent opacity-60 hover:opacity-100'
+          }`}
+        >
+          {s.label}
+          {s.badge && badges?.[s.badge] > 0 && (
+            <span className="grid h-4 min-w-4 place-items-center rounded-full bg-primary px-1 text-[9px] tracking-normal text-primary-content">{badges[s.badge]}</span>
+          )}
+        </NavLink>
+      ))}
+    </nav>
+  )
+}
 
 function AdminShell() {
   const { admin, logout } = useAdminAuth()
@@ -52,19 +81,7 @@ function AdminShell() {
               </button>
             </div>
           </div>
-          <nav className="mx-auto flex max-w-5xl gap-6 overflow-x-auto px-4 [scrollbar-width:none] md:px-8" aria-label="Admin sections">
-            {SECTIONS.map((s) => (
-              <NavLink
-                key={s.to}
-                to={s.to}
-                className={`shrink-0 border-b-2 pb-2 text-xs uppercase tracking-[0.2em] transition ${
-                  s.match(location.pathname) ? 'border-primary text-primary' : 'border-transparent opacity-60 hover:opacity-100'
-                }`}
-              >
-                {s.label}
-              </NavLink>
-            ))}
-          </nav>
+          <SectionTabs />
         </header>
       )}
       <main className="flex-1">

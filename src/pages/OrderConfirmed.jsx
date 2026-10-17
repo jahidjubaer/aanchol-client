@@ -1,10 +1,12 @@
 import { CircleCheck, MessageCircle } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router'
+import OrderExtras from '../components/checkout/OrderExtras.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import { BRAND } from '../config/brand.js'
 import { orderWhatsappMessage } from '../utils/checkout.js'
 import { formatPrice } from '../utils/formatPrice.js'
+import { paymentNote } from '../utils/orderTotals.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 export default function OrderConfirmed() {
@@ -43,15 +45,17 @@ export default function OrderConfirmed() {
               <span>You saved {formatPrice(saved)}</span>
             </li>
           )}
+          <OrderExtras order={{ member: order.member }} as="li" />
           <li className="flex justify-between gap-4 opacity-70">
             <span>Delivery · {order.delivery.label}</span>
             <span>{order.delivery.fee ? formatPrice(order.delivery.fee) : 'Free'}</span>
           </li>
+          <OrderExtras order={{ giftWrap: order.giftWrap, giftCard: order.giftCard }} as="li" showMessage />
         </ul>
         <div className="mt-4 flex items-end justify-between gap-4 border-t border-base-300 pt-4">
           <span>
-            <span className="eyebrow block text-base-content">Total</span>
-            <span className="text-xs opacity-60">Cash on delivery</span>
+            <span className="eyebrow block text-base-content">{order.giftCard ? 'To pay' : 'Total'}</span>
+            <span className="text-xs opacity-60">{paymentNote(order)}</span>
           </span>
           <span className="whitespace-nowrap font-display text-2xl">{formatPrice(order.total)}</span>
         </div>

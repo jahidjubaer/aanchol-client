@@ -2,6 +2,7 @@ import { ArrowLeft, ExternalLink, Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import { DeleteButton, Field, LoadError, Loading, SaveBar, Section, ToggleRow, UnsavedDialog } from '../../components/admin/FormParts.jsx'
+import PairsPicker from '../../components/admin/PairsPicker.jsx'
 import PhotoManager from '../../components/admin/PhotoManager.jsx'
 import WovenImage from '../../components/ui/WovenImage.jsx'
 import { BRAND } from '../../config/brand.js'
@@ -29,6 +30,7 @@ const EMPTY = {
   description: '',
   images: [],
   colors: { base: '#7a1f2b', motif: '#d9b56a' },
+  pairsWith: [],
   active: true,
 }
 
@@ -190,6 +192,10 @@ function ProductForm({ initial, slug, uploadsEnabled, categories, notice }) {
             <textarea value={form.description} onChange={set('description')} rows={5} maxLength={2000} className="textarea w-full" />
           </Field>
         </div>
+      </Section>
+
+      <Section title="Complete the look">
+        <PairsPicker value={form.pairsWith} onChange={(next) => setValue('pairsWith', next)} self={slug} error={errors.pairsWith} />
       </Section>
 
       <Section title="Pattern colours">

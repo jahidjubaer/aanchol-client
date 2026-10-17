@@ -2,9 +2,11 @@ import { ArrowLeft, Check, MessageCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { ItemThumbs, StatusPill } from '../../components/account/OrderBits.jsx'
+import OrderExtras from '../../components/checkout/OrderExtras.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAccount } from '../../context/account.js'
 import { formatPrice } from '../../utils/formatPrice.js'
+import { paymentNote } from '../../utils/orderTotals.js'
 import { CUSTOMER_STATUS, ORDER_STEPS, orderDateTime } from '../../utils/orderStatus.js'
 import { whatsappLink } from '../../utils/whatsapp.js'
 
@@ -126,14 +128,18 @@ export default function AccountOrder() {
                 <dd>You saved {formatPrice(saved)}</dd>
               </div>
             )}
+            <OrderExtras order={{ member: order.member }} />
             <div className="flex justify-between opacity-70">
               <dt>Delivery · {order.delivery.label}</dt>
               <dd>{order.delivery.fee ? formatPrice(order.delivery.fee) : 'Free'}</dd>
             </div>
+            <OrderExtras order={{ giftWrap: order.giftWrap, giftCard: order.giftCard }} showMessage />
             <div className="mt-2 flex items-end justify-between">
               <dt>
-                <span className="eyebrow block text-base-content">Total</span>
-                <span className="text-xs opacity-60">Cash on delivery · {order.payment.paid ? 'Paid' : 'Pay on delivery'}</span>
+                <span className="eyebrow block text-base-content">{order.giftCard ? 'To pay' : 'Total'}</span>
+                <span className="text-xs opacity-60">
+                  {paymentNote(order)} · {order.payment.paid || order.total === 0 ? 'Paid' : 'Pay on delivery'}
+                </span>
               </dt>
               <dd className="font-display text-2xl">{formatPrice(order.total)}</dd>
             </div>

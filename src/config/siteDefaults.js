@@ -92,4 +92,12 @@ export const DEFAULT_SITE = {
   campaign: null,
   announcement: ['Cash on delivery across Bangladesh', 'Free delivery inside Dhaka'],
   homeSections: ['promise-strip', 'featured', 'categories', 'craft', 'promises'].map((id) => ({ id, visible: true })),
+  // Membership levels and gift wrap, as set in Admin → Rewards.
+  memberTiers: [
+    { name: 'Silver', min: 5000, percent: 3 },
+    { name: 'Gold', min: 10000, percent: 5 },
+    { name: 'Platinum', min: 20000, percent: 8 },
+    { name: 'Diamond', min: 30000, percent: 12 },
+  ],
+  giftWrap: { enabled: true, fee: 100 },
 }

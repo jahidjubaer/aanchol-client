@@ -3,12 +3,13 @@ import { collectionPath } from '../utils/collections.js'
 
 const STORY = { label: 'Our Story', bangla: 'আমাদের গল্প', to: '/our-story' }
 
-// Categories marked "show in menu" in the admin, then Our Story.
+// Categories marked "show in menu" in the admin, then Our Story. Category links carry the
+// category, so the menu can show its types and newest pieces.
 export function useNavLinks() {
   const { categories } = useSite()
   const shop = categories
     .filter((c) => c.inNav)
-    .map((c) => ({ label: shortName(c.name), bangla: c.nameBangla, to: collectionPath(c.slug) }))
+    .map((c) => ({ label: shortName(c.name), bangla: c.nameBangla, to: collectionPath(c.slug), category: c }))
   return [...shop, STORY]
 }
 

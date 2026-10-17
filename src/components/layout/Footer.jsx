@@ -15,6 +15,8 @@ export default function Footer() {
     links: [
       ...categories.filter((c) => c.status === 'live').map((c) => ({ label: c.name, to: collectionPath(c.slug) })),
       { label: 'New Arrivals', to: collectionPath('new') },
+      { label: 'Gift cards', to: '/gift-cards' },
+      { label: 'Membership', to: '/membership' },
       { label: 'Wishlist', to: '/wishlist' },
     ],
   }

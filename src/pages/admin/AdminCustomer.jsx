@@ -73,6 +73,27 @@ function ResetLink({ customer }) {
   )
 }
 
+// Level, spend and card number. Worked out from delivered orders, so it's always current.
+function Membership({ id }) {
+  const { data } = useAdminData(`/api/admin/customers/${encodeURIComponent(id)}/membership`)
+  const m = data?.membership
+  if (!m) return null
+  return (
+    <Section title="Membership" aside={m.tier && <span className="text-sm text-primary">{m.tier.percent}% off every order</span>}>
+      <p className="font-display text-2xl">{m.tier ? `${m.tier.name} member` : 'Not a member yet'}</p>
+      <p className="mt-1 text-sm opacity-70">
+        {formatPrice(m.spent)} spent on delivered orders
+        {m.next && ` · ${formatPrice(m.next.remaining)} more for ${m.next.name} (${m.next.percent}%)`}
+      </p>
+      {m.memberNo && (
+        <p className="mt-1 text-xs opacity-60">
+          Card {m.memberNo.replace(/(\d{4})(?=\d)/g, '$1 ')} · since {formatDate(m.memberSince)}
+        </p>
+      )}
+    </Section>
+  )
+}
+
 export default function AdminCustomer() {
   const { id } = useParams()
   const { call } = useAdminAuth()
@@ -151,6 +172,8 @@ export default function AdminCustomer() {
           </ul>
         )}
       </Section>
+
+      <Membership id={customer.id} />
 
       <Section title={`Orders · ${orders.length}`} aside={orders.length > 0 && <span className="text-sm opacity-70">{formatPrice(spent)} spent</span>}>
         {orders.length === 0 ? (

@@ -1,6 +1,7 @@
-import { ChevronDown, CircleAlert, Lock, MessageCircle } from 'lucide-react'
+import { BadgePercent, ChevronDown, CircleAlert, Lock, MessageCircle } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
+import GiftOptions from '../components/checkout/GiftOptions.jsx'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
@@ -8,9 +9,11 @@ import { useAccount } from '../context/account.js'
 import { useCart } from '../context/cart.js'
 import { useCatalog } from '../context/catalog.js'
 import { useSite } from '../context/site.js'
+import { useMembership } from '../hooks/useMembership.js'
 import { placeOrder } from '../utils/api.js'
 import { validateCheckout } from '../utils/checkout.js'
 import { formatPrice } from '../utils/formatPrice.js'
+import { orderTotals } from '../utils/orderTotals.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 const EMPTY_FORM = { name: '', phone: '', email: '', city: '', address: '', note: '', delivery: 'inside-dhaka' }
@@ -69,6 +72,9 @@ export default function Checkout() {
   const [submitting, setSubmitting] = useState(false)
   const [formError, setFormError] = useState(null)
   const errorRef = useRef(null)
+  const { membership, status: memberStatus, reload: reloadMembership } = useMembership()
+  const [wrap, setWrap] = useState({ on: false, message: '' })
+  const [card, setCard] = useState(null) // { code, balance } once applied
 
   // Server errors appear next to the button at the bottom; bring them into view.
   useEffect(() => {
@@ -76,7 +82,24 @@ export default function Checkout() {
   }, [formError])
 
   const delivery = DELIVERY_OPTIONS.find((d) => d.id === form.delivery)
-  const total = subtotal + delivery.fee
+  const tier = membership?.tier ?? null
+  const wrapOn = wrap.on && site.giftWrap.enabled
+  const totals = orderTotals({
+    subtotal,
+    deliveryFee: delivery.fee,
+    tier,
+    giftWrapFee: wrapOn ? site.giftWrap.fee : 0,
+    giftCardBalance: card?.balance ?? 0,
+  })
+  const total = totals.total
+  // As the order will show them, for the summary.
+  const extras = {
+    member: tier && { tier: tier.name, percent: tier.percent, discount: totals.memberDiscount },
+    giftWrap: wrapOn && { fee: site.giftWrap.fee },
+    giftCard: card && { code: card.code, amount: totals.fromCard },
+  }
+  // A signed-in total isn't known until the member level has loaded.
+  const waitingForMembership = memberStatus === 'loading'
 
   if (!ready && lines.length > 0) {
     return (
@@ -106,7 +129,7 @@ export default function Checkout() {
 
   const submit = async (e) => {
     e.preventDefault()
-    if (submitting) return
+    if (submitting || waitingForMembership) return
     const found = validateCheckout(form)
     setErrors(found)
     setTouched(true)
@@ -125,6 +148,10 @@ export default function Checkout() {
           items: items.map((i) => ({ slug: i.slug, qty: i.qty })),
           // Lets the server refuse the order if prices changed (e.g. a sale ended) since the bag was shown.
           expectedSubtotal: subtotal,
+          // Same for the whole total. Left out if the member level couldn't be loaded: the server applies it anyway.
+          ...(memberStatus !== 'error' ? { expectedTotal: totals.beforeCard } : {}),
+          ...(wrapOn ? { giftWrap: { message: wrap.message } } : {}),
+          ...(card ? { giftCard: card.code } : {}),
         },
         account.token,
       )
@@ -146,7 +173,11 @@ export default function Checkout() {
       if (err.status === 409 && err.body.code === 'PRICE_CHANGED') {
         catalog.retry()
         site.refresh()
+        reloadMembership()
         setFormError(`${err.message} Nothing has been ordered yet.`)
+      } else if (err.body.fields?.giftCard) {
+        setCard(null)
+        setFormError(`${err.body.fields.giftCard} Nothing has been ordered yet.`)
       } else if (err.status === 409 && err.body.items) {
         err.body.items.forEach((i) => setQty(i.slug, i.available))
         setFormError(`${err.message} We've updated your bag; please check it and place the order again.`)
@@ -178,7 +209,7 @@ export default function Checkout() {
         </button>
         {summaryOpen && (
           <div className="px-4 pb-4">
-            <OrderSummary items={items} subtotal={subtotal} delivery={delivery} />
+            <OrderSummary items={items} subtotal={subtotal} delivery={delivery} extras={extras} total={total} />
           </div>
         )}
       </div>
@@ -196,7 +227,29 @@ export default function Checkout() {
                   <Link to="/account/login" state={{ next: '/checkout' }} className="text-primary underline underline-offset-4">
                     Sign in
                   </Link>{' '}
-                  for a faster checkout, or continue as a guest.
+                  for a faster checkout and{' '}
+                  <Link to="/membership" className="underline underline-offset-4">
+                    member discounts
+                  </Link>
+                  , or continue as a guest.
+                </p>
+              )}
+              {tier && (
+                <p className="mb-5 flex items-center gap-2 border border-secondary/40 bg-secondary/5 px-4 py-3 text-sm">
+                  <BadgePercent size={16} strokeWidth={1.5} className="shrink-0 text-secondary" />
+                  <span>
+                    {tier.name} member: your {tier.percent}% discount is applied
+                    {totals.memberDiscount > 0 && ` (${formatPrice(totals.memberDiscount)} off)`}.
+                  </span>
+                </p>
+              )}
+              {!tier && membership?.next && (
+                <p className="mb-5 text-xs opacity-70">
+                  {formatPrice(membership.next.remaining)} more in delivered orders makes you a {membership.next.name} member, with{' '}
+                  {membership.next.percent}% off every order.{' '}
+                  <Link to="/membership" className="underline underline-offset-4">
+                    How membership works
+                  </Link>
                 </p>
               )}
               <div className="grid gap-4 sm:grid-cols-2">
@@ -294,13 +347,27 @@ export default function Checkout() {
               </div>
             </Section>
 
-            <Section step="03" title="Payment">
+            <Section step="03" title="Gifting">
+              <GiftOptions
+                wrapSettings={site.giftWrap}
+                wrap={wrap}
+                onWrapChange={setWrap}
+                card={card}
+                onCardChange={setCard}
+                cardError={errors.giftCard}
+                fromCard={totals.fromCard}
+              />
+            </Section>
+
+            <Section step="04" title="Payment">
               <div className="grid gap-3">
                 <label className="flex items-start gap-3 border border-primary bg-primary/5 p-4">
                   <input type="radio" checked readOnly className="radio radio-sm radio-primary mt-0.5" />
                   <span>
                     <span className="block text-sm">Cash on delivery</span>
-                    <span className="block text-xs opacity-60">Pay in cash when your sari arrives.</span>
+                    <span className="block text-xs opacity-60">
+                      {card && total === 0 ? 'Nothing to pay: your gift card covers it all.' : 'Pay in cash when your sari arrives.'}
+                    </span>
                   </span>
                 </label>
                 <div className="flex items-center gap-3 border border-base-300 p-4 opacity-50">
@@ -330,7 +397,7 @@ export default function Checkout() {
               )}
               <button
                 type="submit"
-                disabled={submitting}
+                disabled={submitting || waitingForMembership}
                 className="btn btn-primary btn-block btn-lg uppercase tracking-[0.25em]"
               >
                 {submitting ? (
@@ -350,7 +417,7 @@ export default function Checkout() {
           <aside className="hidden lg:block">
             <div className="sticky top-32 bg-base-200 p-6">
               <p className="eyebrow mb-2">Order summary</p>
-              <OrderSummary items={items} subtotal={subtotal} delivery={delivery} />
+              <OrderSummary items={items} subtotal={subtotal} delivery={delivery} extras={extras} total={total} />
             </div>
           </aside>
         </div>

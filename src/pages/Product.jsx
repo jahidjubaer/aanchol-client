@@ -1,6 +1,8 @@
 import { HandHeart, MessageCircle, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
+import CompleteTheLook from '../components/product/CompleteTheLook.jsx'
+import NotifyMe from '../components/product/NotifyMe.jsx'
 import ProductGallery from '../components/product/ProductGallery.jsx'
 import StickyBuyBar from '../components/product/StickyBuyBar.jsx'
 import { CatalogNotice } from '../components/ui/CatalogState.jsx'
@@ -172,7 +174,7 @@ export default function Product() {
               )}
               <p className="mt-1 text-xs tracking-wide opacity-60">
                 {soldOut
-                  ? 'Sold out · message us on WhatsApp for a similar piece'
+                  ? 'Sold out · leave your number below, or message us for a similar piece'
                   : product.stock === 1
                     ? 'One of a kind · only 1 available'
                     : `Only ${product.stock} available`}
@@ -207,6 +209,7 @@ export default function Product() {
                   <MessageCircle size={18} strokeWidth={1.5} /> Order on WhatsApp
                 </a>
                 <WishlistButton product={product} variant="inline" />
+                {soldOut && <NotifyMe key={product.slug} product={product} />}
               </div>
 
               <ul className="mt-6 grid gap-2 text-sm">
@@ -260,6 +263,8 @@ export default function Product() {
           </div>
         </div>
       </div>
+
+      <CompleteTheLook product={product} />
 
       {related.length > 0 && (
         <section className="border-t border-base-300 bg-base-200">

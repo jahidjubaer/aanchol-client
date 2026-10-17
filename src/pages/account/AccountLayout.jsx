@@ -5,6 +5,8 @@ import { useAccount } from '../../context/account.js'
 
 const TABS = [
   { to: '/account', label: 'Orders', end: true },
+  { to: '/account/membership', label: 'Membership' },
+  { to: '/account/gift-cards', label: 'Gift cards' },
   { to: '/account/addresses', label: 'Addresses' },
   { to: '/account/profile', label: 'Profile' },
 ]

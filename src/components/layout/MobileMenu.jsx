@@ -1,6 +1,6 @@
-import { Heart, MessageCircle, User, X } from 'lucide-react'
+import { Heart, MessageCircle, Minus, Plus, User, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND } from '../../config/brand.js'
 import { useAccount } from '../../context/account.js'
@@ -10,6 +10,48 @@ import { useNavLinks } from '../../hooks/useNavLinks.js'
 import JamdaniDivider from '../ui/JamdaniDivider.jsx'
 import Logo from '../ui/Logo.jsx'
 import { EASE_LUXE } from '../../utils/motion.js'
+
+// A category with types opens to show them (Wood, Carved...); the name itself goes to the category.
+function MenuLink({ link, onClose }) {
+  const [expanded, setExpanded] = useState(false)
+  const types = link.category?.status === 'live' ? (link.category.types ?? []) : []
+  return (
+    <div className="border-b border-base-300">
+      <div className="flex items-center gap-3">
+        <NavLink
+          to={link.to}
+          onClick={onClose}
+          className={({ isActive }) => `flex flex-1 items-baseline justify-between py-4 ${isActive ? 'text-primary' : ''}`}
+        >
+          <span className="font-display text-3xl">{link.label}</span>
+          <span className="font-bangla text-sm text-secondary">{link.bangla}</span>
+        </NavLink>
+        {types.length > 0 && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            aria-expanded={expanded}
+            aria-label={`${expanded ? 'Hide' : 'Show'} ${link.label} types`}
+            className="grid size-10 place-items-center"
+          >
+            {expanded ? <Minus size={18} strokeWidth={1.4} /> : <Plus size={18} strokeWidth={1.4} />}
+          </button>
+        )}
+      </div>
+      {expanded && (
+        <ul className="grid grid-cols-2 gap-x-4 gap-y-3 pb-4 pl-1 text-sm">
+          {types.map((t) => (
+            <li key={t.slug}>
+              <Link to={`${link.to}?type=${t.slug}`} onClick={onClose} className="opacity-80">
+                {t.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
 
 export default function MobileMenu({ open, onClose }) {
   useLockBodyScroll(open)
@@ -59,22 +101,15 @@ export default function MobileMenu({ open, onClose }) {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.15 + i * 0.07, duration: 0.6, ease: EASE_LUXE }}
                   >
-                    <NavLink
-                      to={link.to}
-                      onClick={onClose}
-                      className={({ isActive }) =>
-                        `flex items-baseline justify-between border-b border-base-300 py-4 ${isActive ? 'text-primary' : ''}`
-                      }
-                    >
-                      <span className="font-display text-3xl">{link.label}</span>
-                      <span className="font-bangla text-sm text-secondary">{link.bangla}</span>
-                    </NavLink>
+                    <MenuLink link={link} onClose={onClose} />
                   </motion.li>
                 ))}
               </ul>
 
-              <ul className="mt-6 flex gap-6 text-xs uppercase tracking-[0.2em]">
+              <ul className="mt-6 grid grid-cols-2 gap-x-6 gap-y-1 text-xs uppercase tracking-[0.2em]">
                 {[
+                  { label: 'Gift cards', to: '/gift-cards' },
+                  { label: 'Membership', to: '/membership' },
                   { label: 'About Us', to: '/about' },
                   { label: 'Contact', to: '/contact' },
                 ].map((link) => (

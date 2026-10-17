@@ -1,5 +1,6 @@
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
-import { useEffect, useState } from 'react'
+import { AnimatePresence } from 'motion/react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND } from '../../config/brand.js'
 import { useAccount } from '../../context/account.js'
@@ -9,6 +10,7 @@ import { useAnnouncements, useNavLinks } from '../../hooks/useNavLinks.js'
 import { useScrolled } from '../../hooks/useScrolled.js'
 import { LogoMark } from '../ui/Logo.jsx'
 import MotifBand from '../ui/MotifBand.jsx'
+import MegaMenu from './MegaMenu.jsx'
 import MobileMenu from './MobileMenu.jsx'
 import SearchPanel from './SearchPanel.jsx'
 
@@ -35,7 +37,24 @@ export default function Navbar() {
   const announcements = useAnnouncements()
   const [menuOpen, setMenuOpen] = useState(false)
   const [searchOpen, setSearchOpen] = useState(false)
+  const [dropdown, setDropdown] = useState(null) // slug of the category whose menu is open
+  const closeTimer = useRef(null)
   const scrolled = useScrolled()
+  const openCategory = navLinks.find((l) => l.category?.slug === dropdown)?.category
+
+  // A short delay lets the pointer travel from the link down into the menu.
+  const showDropdown = (slug) => {
+    clearTimeout(closeTimer.current)
+    setDropdown(slug)
+  }
+  const hideDropdown = () => {
+    clearTimeout(closeTimer.current)
+    closeTimer.current = setTimeout(() => setDropdown(null), 150)
+  }
+  const closeDropdown = () => {
+    clearTimeout(closeTimer.current)
+    setDropdown(null)
+  }
 
   // "/" opens search on a keyboard, as on most shops.
   useEffect(() => {
@@ -59,6 +78,8 @@ export default function Navbar() {
       )}
 
       <header
+        onMouseLeave={hideDropdown}
+        onKeyDown={(e) => e.key === 'Escape' && closeDropdown()}
         className={`sticky top-0 z-40 bg-base-100/95 backdrop-blur transition-shadow duration-500 ${
           scrolled ? 'shadow-[0_1px_0_0_var(--color-base-300)]' : ''
         }`}
@@ -78,9 +99,16 @@ export default function Navbar() {
             </IconButton>
             <ul className="hidden gap-8 text-xs uppercase tracking-[0.25em] md:flex">
               {navLinks.map((link) => (
-                <li key={link.to}>
+                <li
+                  key={link.to}
+                  onMouseEnter={() => (link.category ? showDropdown(link.category.slug) : hideDropdown())}
+                  onFocus={() => link.category && showDropdown(link.category.slug)}
+                >
                   <NavLink
                     to={link.to}
+                    onClick={closeDropdown}
+                    aria-haspopup={link.category ? 'true' : undefined}
+                    aria-expanded={link.category ? dropdown === link.category.slug : undefined}
                     className={({ isActive }) =>
                       `relative py-2 transition hover:text-primary after:absolute after:inset-x-0 after:-bottom-0.5 after:h-px after:origin-left after:bg-gold after:transition-transform after:duration-500 ${
                         isActive ? 'text-primary after:scale-x-100' : 'after:scale-x-0 hover:after:scale-x-100'
@@ -139,6 +167,11 @@ export default function Navbar() {
           </div>
         </nav>
         <MotifBand className="h-2 text-gold/40" />
+        <AnimatePresence>
+          {openCategory && (
+            <MegaMenu key={openCategory.slug} category={openCategory} onNavigate={closeDropdown} onMouseEnter={() => showDropdown(openCategory.slug)} />
+          )}
+        </AnimatePresence>
       </header>
 
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
