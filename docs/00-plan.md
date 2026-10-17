@@ -39,7 +39,7 @@ Brand name: **not final**. `Aanchol` (আঁচল) is used as a placeholder and
 3. Pages with mock data: ✅ Home (`03`) · ✅ Collection + Product (`04`) · ✅ Cart + Checkout (`05`) · ✅ Our Story · About · Contact (`10`)
 4. Server: Express + MongoDB: ✅ products + orders API (`aanchol-server/docs/01`) · ✅ admin login + order management (`server/02`, client `07`)
 5. Connect frontend to API: ✅ checkout places real orders (`06`) · ✅ products from API (`08`) · ✅ admin products + Cloudinary photos (`09`, server `04`)
-6. Deploy (Vercel + Render) and connect the domain
+6. ✅ Deploy: shop on Vercel (`11`), API on Render (server `05`) · connect the domain
 7. Payments: COD first, then bKash / SSLCommerz
 
 ## Working rules
