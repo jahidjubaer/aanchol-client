@@ -43,3 +43,30 @@ export function timeAgo(iso, now = Date.now()) {
 export const telLink = (phone) => `tel:+88${phone}`
 export const customerWhatsapp = (phone, text) =>
   `https://wa.me/88${phone}${text ? `?text=${encodeURIComponent(text)}` : ''}`
+
+// <input type="datetime-local"> works in the admin's local time without a zone: "2026-10-20T09:00".
+export function toLocalInput(iso) {
+  if (!iso) return ''
+  const d = new Date(iso)
+  return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
+}
+
+export const fromLocalInput = (value) => (value ? new Date(value).toISOString() : null)
+
+const DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Dhaka' })
+export const formatDate = (iso) => DATE.format(new Date(iso))
+
+// Where a campaign or slide stands right now.
+export function scheduleState({ active, startsAt, endsAt }, now = Date.now()) {
+  if (active === false) return 'off'
+  if (startsAt && new Date(startsAt).getTime() > now) return 'scheduled'
+  if (endsAt && new Date(endsAt).getTime() <= now) return 'ended'
+  return 'live'
+}
+
+export const SCHEDULE = {
+  live: { label: 'Live now', className: 'bg-accent/10 text-accent border-accent/30' },
+  scheduled: { label: 'Scheduled', className: 'bg-secondary/15 text-secondary border-secondary/40' },
+  ended: { label: 'Ended', className: 'bg-base-300/60 text-base-content/60 border-base-300' },
+  off: { label: 'Off', className: 'bg-base-300/60 text-base-content/60 border-base-300' },
+}

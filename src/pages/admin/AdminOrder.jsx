@@ -212,6 +212,7 @@ export default function AdminOrder() {
                   </Link>
                   <span className="block text-xs opacity-60">
                     {formatPrice(i.price)} × {i.qty}
+                    {i.listPrice && <span className="ml-1 line-through">{formatPrice(i.listPrice)}</span>}
                   </span>
                 </span>
                 <span className="whitespace-nowrap">{formatPrice(i.price * i.qty)}</span>
@@ -223,6 +224,12 @@ export default function AdminOrder() {
               <dt>Subtotal</dt>
               <dd>{formatPrice(order.subtotal)}</dd>
             </div>
+            {order.campaign && (
+              <div className="flex justify-between text-primary">
+                <dt>{order.campaign.name ?? order.campaign.title}</dt>
+                <dd>{order.campaign.percentOff}% off applied</dd>
+              </div>
+            )}
             <div className="flex justify-between opacity-70">
               <dt>Delivery · {order.delivery.label}</dt>
               <dd>{order.delivery.fee ? formatPrice(order.delivery.fee) : 'Free'}</dd>

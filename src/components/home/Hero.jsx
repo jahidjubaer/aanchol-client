@@ -2,23 +2,13 @@ import { ChevronLeft, ChevronRight, Pause, Play } from 'lucide-react'
 import { AnimatePresence, motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSite } from '../../context/site.js'
+import { heroShade as shade } from '../../utils/heroShade.js'
 import { imageSrc } from '../../utils/image.js'
 import { EASE_LUXE } from '../../utils/motion.js'
 import SmartLink from '../ui/SmartLink.jsx'
 
 const SLIDE_MS = 7000
 const SWIPE_PX = 50
-const INK = '43, 29, 22' // --color-ink as rgb, for the photo shade
-
-// The shade over the photo. "overlay" (0–90) is set per slide in the admin.
-// Phones: darker at the bottom where the text sits. Desktop: darker on the text side.
-function shade(overlay, align, desktop) {
-  const o = overlay / 100
-  const a = (x) => `rgba(${INK}, ${Math.min(0.92, x).toFixed(2)})`
-  if (!desktop) return `linear-gradient(to top, ${a(o + 0.4)} 0%, ${a(o * 0.7)} 45%, ${a(o * 0.25)} 100%)`
-  if (align === 'center') return `radial-gradient(ellipse at center, ${a(o + 0.15)} 0%, ${a(o * 0.6)} 70%, ${a(o * 0.4)} 100%)`
-  return `linear-gradient(to right, ${a(o + 0.3)} 0%, ${a(o * 0.75)} 40%, ${a(o * 0.15)} 75%, transparent 100%)`
-}
 
 const fadeUp = (delay) => ({
   initial: { opacity: 0, y: 24 },

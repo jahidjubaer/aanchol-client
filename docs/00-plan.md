@@ -1,6 +1,6 @@
 # 00 — Project Plan
 
-_Last updated: 2026-10-17_
+_Last updated: 2026-10-18_
 
 ## Business
 Semi-luxury Bangladeshi traditional fashion, women first (men later).
@@ -40,9 +40,11 @@ Brand name: **not final**. `Aanchol` (আঁচল) is used as a placeholder and
 4. Server: Express + MongoDB: ✅ products + orders API (`aanchol-server/docs/01`) · ✅ admin login + order management (`server/02`, client `07`)
 5. Connect frontend to API: ✅ checkout places real orders (`06`) · ✅ products from API (`08`) · ✅ admin products + Cloudinary photos (`09`, server `04`)
 6. ✅ Deploy: shop on Vercel (`11`), API on Render (server `05`) · connect the domain
-7. Payments: COD first, then bKash / SSLCommerz
+7. ✅ Admin-managed storefront: categories, hero slider, campaign popup + automatic discounts, home layout, wishlist (`12`, `13`, server `06`)
+8. Payments: COD first, then bKash / SSLCommerz
+9. Customer accounts (wishlist and orders follow the customer across devices)
 
 ## Working rules
-- Every decision is confirmed with the owner before implementation.
+- Routine decisions are made during the work; important ones (money, policies, brand, accounts) are confirmed with the owner first.
 - Each task ends with a numbered doc in `docs/` (client repo) or `server/docs/` (server repo).
 - Git/GitHub: only **jahidjubaer** appears as contributor (no co-author trailers).
