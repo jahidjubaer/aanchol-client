@@ -1,5 +1,7 @@
+import { Check, ShoppingBag } from 'lucide-react'
 import { motion } from 'motion/react'
 import { Link } from 'react-router'
+import { useCart } from '../../context/cart.js'
 import { getSubtitle, isSoldOut, percentOff } from '../../utils/product.js'
 import { imageSrc, imageSrcSet } from '../../utils/image.js'
 import { EASE_LUXE } from '../../utils/motion.js'
@@ -7,11 +9,17 @@ import Price from './Price.jsx'
 import WishlistButton from './WishlistButton.jsx'
 import WovenImage from './WovenImage.jsx'
 
-export default function ProductCard({ product }) {
+// quickAdd: an "Add to bag" button on the photo (a bar on hover on desktop, a round button on phones).
+// Pieces come in one size, so nothing needs choosing first.
+export default function ProductCard({ product, quickAdd = true }) {
   const { slug, name, badge, images, colors } = product
   const [image, hoverImage] = images
   const soldOut = isSoldOut(product)
   const off = product.salePrice !== undefined ? percentOff(product) : 0
+  const cart = useCart()
+  const inCart = cart.lines.find((l) => l.slug === slug)?.qty ?? 0
+  const allInBag = inCart >= product.stock
+  const add = () => !allInBag && cart.addItem(product)
 
   return (
     <article className="group">
@@ -61,12 +69,35 @@ export default function ProductCard({ product }) {
 
         <WishlistButton product={product} className="absolute right-2 top-2" />
 
-        <Link
-          to={`/products/${slug}`}
-          className="absolute inset-x-0 bottom-0 hidden translate-y-full bg-base-100/95 py-3 text-center text-xs uppercase tracking-[0.25em] transition duration-500 group-hover:translate-y-0 md:block"
-        >
-          View Details
-        </Link>
+        {quickAdd && !soldOut ? (
+          <>
+            <button
+              type="button"
+              onClick={add}
+              disabled={allInBag}
+              className="absolute inset-x-0 bottom-0 hidden translate-y-full items-center justify-center gap-2 bg-base-100/95 py-3 text-xs uppercase tracking-[0.25em] transition duration-500 hover:bg-primary hover:text-primary-content focus-visible:translate-y-0 disabled:hover:bg-base-100/95 disabled:hover:text-base-content group-hover:translate-y-0 md:flex"
+            >
+              {allInBag ? <Check size={14} strokeWidth={1.5} /> : <ShoppingBag size={14} strokeWidth={1.5} />}
+              {allInBag ? 'In your bag' : 'Add to bag'}
+            </button>
+            <button
+              type="button"
+              onClick={add}
+              disabled={allInBag}
+              aria-label={allInBag ? `${name} is in your bag` : `Add ${name} to bag`}
+              className="absolute bottom-2 right-2 grid size-10 place-items-center rounded-full bg-base-100/90 backdrop-blur transition active:scale-90 md:hidden"
+            >
+              {allInBag ? <Check size={17} strokeWidth={1.5} className="text-primary" /> : <ShoppingBag size={17} strokeWidth={1.5} />}
+            </button>
+          </>
+        ) : (
+          <Link
+            to={`/products/${slug}`}
+            className="absolute inset-x-0 bottom-0 hidden translate-y-full bg-base-100/95 py-3 text-center text-xs uppercase tracking-[0.25em] transition duration-500 group-hover:translate-y-0 md:block"
+          >
+            View Details
+          </Link>
+        )}
       </div>
 
       <div className="pt-3 md:pt-4">

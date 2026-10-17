@@ -2,6 +2,7 @@ import { Lock } from 'lucide-react'
 import { useState } from 'react'
 import { Navigate, useSearchParams } from 'react-router'
 import JamdaniDivider from '../../components/ui/JamdaniDivider.jsx'
+import { LogoMark } from '../../components/ui/Logo.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAdminAuth } from '../../context/adminAuth.js'
 
@@ -37,6 +38,7 @@ export default function AdminLogin() {
       <title>{`Admin login | ${BRAND.name}`}</title>
       <div className="w-full max-w-sm">
         <div className="text-center">
+          <LogoMark className="mx-auto mb-4 size-14 text-primary" />
           <p className="font-display text-3xl uppercase tracking-[0.3em]">{BRAND.name}</p>
           <p className="mt-1 font-bangla text-sm text-secondary">{BRAND.nameBangla}</p>
           <JamdaniDivider className="my-6" />

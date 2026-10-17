@@ -1,5 +1,5 @@
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND } from '../../config/brand.js'
 import { useAccount } from '../../context/account.js'
@@ -7,8 +7,10 @@ import { useCart } from '../../context/cart.js'
 import { useWishlist } from '../../context/wishlist.js'
 import { useAnnouncements, useNavLinks } from '../../hooks/useNavLinks.js'
 import { useScrolled } from '../../hooks/useScrolled.js'
+import { LogoMark } from '../ui/Logo.jsx'
 import MotifBand from '../ui/MotifBand.jsx'
 import MobileMenu from './MobileMenu.jsx'
+import SearchPanel from './SearchPanel.jsx'
 
 const iconProps = { size: 20, strokeWidth: 1.4 }
 
@@ -32,7 +34,20 @@ export default function Navbar() {
   const navLinks = useNavLinks()
   const announcements = useAnnouncements()
   const [menuOpen, setMenuOpen] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const scrolled = useScrolled()
+
+  // "/" opens search on a keyboard, as on most shops.
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return
+      if (e.target.closest?.('input, textarea, select, [contenteditable="true"]')) return
+      e.preventDefault()
+      setSearchOpen(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <>
@@ -58,7 +73,7 @@ export default function Navbar() {
             <IconButton label="Open menu" className="md:hidden" onClick={() => setMenuOpen(true)}>
               <Menu {...iconProps} />
             </IconButton>
-            <IconButton label="Search" className="md:hidden">
+            <IconButton label="Search" className="md:hidden" onClick={() => setSearchOpen(true)}>
               <Search {...iconProps} />
             </IconButton>
             <ul className="hidden gap-8 text-xs uppercase tracking-[0.25em] md:flex">
@@ -79,13 +94,18 @@ export default function Navbar() {
             </ul>
           </div>
 
-          <Link to="/" className="text-center leading-none" aria-label={`${BRAND.name} home`}>
-            <span className="block font-display text-2xl tracking-[0.3em] uppercase md:text-3xl">{BRAND.name}</span>
-            <span className="mt-1 block font-bangla text-[11px] text-secondary md:text-xs">{BRAND.nameBangla}</span>
+          <Link to="/" className="flex items-center gap-2 leading-none md:gap-3" aria-label={`${BRAND.name} home`}>
+            <LogoMark
+              className={`shrink-0 text-primary transition-[width,height] duration-500 ${scrolled ? 'size-6 md:size-8' : 'size-7 md:size-10'}`}
+            />
+            <span className="text-left">
+              <span className="block font-display text-xl tracking-[0.25em] uppercase md:text-3xl md:tracking-[0.3em]">{BRAND.name}</span>
+              <span className="mt-1 block font-bangla text-[11px] text-secondary md:text-xs">{BRAND.nameBangla}</span>
+            </span>
           </Link>
 
           <div className="flex items-center justify-end">
-            <IconButton label="Search" className="hidden md:grid">
+            <IconButton label="Search" className="hidden md:grid" onClick={() => setSearchOpen(true)}>
               <Search {...iconProps} />
             </IconButton>
             <Link
@@ -122,6 +142,7 @@ export default function Navbar() {
       </header>
 
       <MobileMenu open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <SearchPanel open={searchOpen} onClose={() => setSearchOpen(false)} />
     </>
   )
 }

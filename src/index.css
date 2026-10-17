@@ -59,6 +59,11 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* Search boxes have their own close/clear buttons; hide the browser's blue cross. */
+  input[type="search"]::-webkit-search-cancel-button {
+    appearance: none;
+  }
+
   body {
     @apply bg-base-100 text-base-content font-sans font-light antialiased;
   }

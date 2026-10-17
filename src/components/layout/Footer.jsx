@@ -3,6 +3,7 @@ import { BRAND, FOOTER_LINKS, PAYMENT_METHODS } from '../../config/brand.js'
 import { useSite } from '../../context/site.js'
 import { collectionPath } from '../../utils/collections.js'
 import JamdaniDivider from '../ui/JamdaniDivider.jsx'
+import { LogoMark } from '../ui/Logo.jsx'
 import MotifBand from '../ui/MotifBand.jsx'
 
 const YEAR = new Date().getFullYear()
@@ -12,7 +13,7 @@ export default function Footer() {
   const shopLinks = {
     title: 'Shop',
     links: [
-      ...categories.map((c) => ({ label: c.name, to: collectionPath(c.slug) })),
+      ...categories.filter((c) => c.status === 'live').map((c) => ({ label: c.name, to: collectionPath(c.slug) })),
       { label: 'New Arrivals', to: collectionPath('new') },
       { label: 'Wishlist', to: '/wishlist' },
     ],
@@ -25,6 +26,7 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 pt-14 pb-8 md:px-8">
         <div className="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr_1fr_1.3fr]">
           <div>
+            <LogoMark className="mb-4 size-12 text-ivory" flower="var(--color-gold-light)" />
             <p className="font-display text-3xl tracking-[0.3em] uppercase">{BRAND.name}</p>
             <p className="mt-1 font-bangla text-gold-light">{BRAND.nameBangla}</p>
             <p className="mt-4 max-w-xs text-sm leading-relaxed opacity-70">

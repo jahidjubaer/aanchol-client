@@ -29,7 +29,7 @@ function PhotoTile({ category }) {
   )
 }
 
-// Coming-soon categories, and live ones without a banner photo yet.
+// Live categories without a banner photo yet (and coming-soon ones when nothing is live).
 function WovenTile({ category }) {
   const soon = category.status === 'coming-soon'
   return (
@@ -56,21 +56,56 @@ const GRID = {
   2: 'md:grid-cols-2',
 }
 
+// Small tile for a category that's coming soon, so the big tiles stay for what can be bought now.
+function SoonTile({ category }) {
+  return (
+    <Link
+      to={collectionPath(category.slug)}
+      className="group flex h-full flex-col justify-between gap-4 border border-base-300 p-5 transition hover:border-gold md:p-6"
+    >
+      <span>
+        {category.nameBangla && <span className="block font-bangla text-sm text-secondary">{category.nameBangla}</span>}
+        <span className="mt-1 block font-display text-2xl leading-tight">{category.name}</span>
+      </span>
+      <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] opacity-70 group-hover:text-primary group-hover:opacity-100">
+        Hear first <ArrowRight size={12} className="transition group-hover:translate-x-1" />
+      </span>
+    </Link>
+  )
+}
+
 export default function ShopByCategory() {
   const { categories } = useSite()
+  const live = categories.filter((c) => c.status === 'live')
+  // With nothing live yet, the coming-soon ones get the big tiles.
+  const big = live.length ? live : categories
+  const soon = live.length ? categories.filter((c) => c.status === 'coming-soon') : []
   if (!categories.length) return null
 
   return (
     <section className="mx-auto max-w-7xl px-4 py-20 md:px-8 md:py-28">
       <SectionHeading eyebrow="Collections" title="Shop by craft" bangla="কারুশিল্প অনুযায়ী" />
 
-      <div className={`mt-12 grid gap-4 md:gap-6 ${GRID[categories.length] ?? 'md:grid-cols-2 lg:grid-cols-3'}`}>
-        {categories.map((category, i) => (
+      <div className={`mt-12 grid gap-4 md:gap-6 ${GRID[big.length] ?? 'md:grid-cols-2 lg:grid-cols-3'}`}>
+        {big.map((category, i) => (
           <Reveal key={category.slug} delay={(i % 3) * 0.12}>
             {category.status === 'live' && category.banner ? <PhotoTile category={category} /> : <WovenTile category={category} />}
           </Reveal>
         ))}
       </div>
+
+      {soon.length > 0 && (
+        <Reveal className="mt-14">
+          <p className="eyebrow text-center text-base-content/60">Coming soon to the shop</p>
+          <ul className="mt-6 grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+            {soon.map((category) => (
+              <li key={category.slug}>
+                <SoonTile category={category} />
+              </li>
+            ))}
+          </ul>
+        </Reveal>
+      )}
     </section>
   )
 }

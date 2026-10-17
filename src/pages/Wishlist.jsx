@@ -34,7 +34,7 @@ function SavedPiece({ product }) {
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ duration: 0.5, ease: EASE_LUXE }}
     >
-      <ProductCard product={product} />
+      <ProductCard product={product} quickAdd={false} />
       <div className="mt-3 grid grid-cols-[1fr_auto] gap-2">
         <button
           type="button"

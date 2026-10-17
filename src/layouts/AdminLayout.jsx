@@ -1,5 +1,6 @@
 import { LogOut, Store } from 'lucide-react'
 import { Link, Navigate, NavLink, Outlet, ScrollRestoration, useLocation } from 'react-router'
+import { LogoMark } from '../components/ui/Logo.jsx'
 import { BRAND } from '../config/brand.js'
 import { useAdminAuth } from '../context/adminAuth.js'
 import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
@@ -29,8 +30,11 @@ function AdminShell() {
       {admin && (
         <header className="sticky top-0 z-30 border-b border-base-300 bg-base-100/95 backdrop-blur">
           <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-4 px-4 md:px-8">
-            <Link to="/admin" className="flex items-baseline gap-3">
-              <span className="font-display text-xl uppercase tracking-[0.25em]">{BRAND.name}</span>
+            <Link to="/admin" className="flex items-center gap-3">
+              <span className="flex items-center gap-2">
+                <LogoMark className="size-6 text-primary" />
+                <span className="font-display text-xl uppercase tracking-[0.25em]">{BRAND.name}</span>
+              </span>
               <span className="text-[10px] uppercase tracking-[0.25em] text-secondary">Admin</span>
             </Link>
             <div className="flex items-center gap-1">

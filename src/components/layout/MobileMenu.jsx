@@ -8,6 +8,7 @@ import { useWishlist } from '../../context/wishlist.js'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll.js'
 import { useNavLinks } from '../../hooks/useNavLinks.js'
 import JamdaniDivider from '../ui/JamdaniDivider.jsx'
+import Logo from '../ui/Logo.jsx'
 import { EASE_LUXE } from '../../utils/motion.js'
 
 export default function MobileMenu({ open, onClose }) {
@@ -43,7 +44,7 @@ export default function MobileMenu({ open, onClose }) {
             transition={{ duration: 0.6, ease: EASE_LUXE }}
           >
             <div className="flex items-center justify-between px-5 py-4">
-              <span className="font-display text-xl tracking-[0.3em] uppercase">{BRAND.name}</span>
+              <Logo />
               <button type="button" onClick={onClose} aria-label="Close menu" className="grid size-10 place-items-center">
                 <X size={22} strokeWidth={1.4} />
               </button>

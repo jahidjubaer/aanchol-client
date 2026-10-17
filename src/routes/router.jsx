@@ -10,6 +10,7 @@ import NotFound from '../pages/NotFound.jsx'
 import OrderConfirmed from '../pages/OrderConfirmed.jsx'
 import OurStory from '../pages/OurStory.jsx'
 import Product from '../pages/Product.jsx'
+import Search from '../pages/Search.jsx'
 import StyleGuide from '../pages/StyleGuide.jsx'
 import Wishlist from '../pages/Wishlist.jsx'
 
@@ -29,6 +30,7 @@ export const router = createBrowserRouter([
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
       { path: 'wishlist', element: <Wishlist /> },
+      { path: 'search', element: <Search /> },
       { path: 'account/login', lazy: lazyPage(() => import('../pages/account/SignIn.jsx')) },
       { path: 'account/reset', lazy: lazyPage(() => import('../pages/account/ResetPassword.jsx')) },
       {
