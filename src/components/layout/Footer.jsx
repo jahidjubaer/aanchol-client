@@ -11,7 +11,7 @@ export default function Footer() {
       <MotifBand className="h-3 text-gold/60" />
 
       <div className="mx-auto max-w-7xl px-4 pt-14 pb-8 md:px-8">
-        <div className="grid gap-10 md:grid-cols-[1.4fr_1fr_1fr_1.4fr]">
+        <div className="grid gap-10 md:grid-cols-[1.3fr_1fr_1fr_1fr_1.3fr]">
           <div>
             <p className="font-display text-3xl tracking-[0.3em] uppercase">{BRAND.name}</p>
             <p className="mt-1 font-bangla text-gold-light">{BRAND.nameBangla}</p>

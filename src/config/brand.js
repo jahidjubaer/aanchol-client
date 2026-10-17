@@ -3,9 +3,13 @@ export const BRAND = {
   name: 'Aanchol',
   nameBangla: 'আঁচল',
   tagline: 'Handwoven Heritage',
+  // What the name means, shown on the About page. Rewrite if the name changes.
+  meaning: 'is the loose end of a sari, the part that falls over the shoulder and carries its finest weaving.',
   announcement: ['Cash on delivery across Bangladesh', 'Free delivery inside Dhaka'],
   phone: '+880 1XXX-XXXXXX',
   whatsapp: '8801XXXXXXXXX',
+  email: 'hello@aanchol.com', // placeholder until the domain is bought
+  hours: 'Every day, 10am to 8pm', // placeholder: when WhatsApp and calls are answered
   socials: [
     { label: 'Facebook', href: 'https://facebook.com/' },
     { label: 'Instagram', href: 'https://instagram.com/' },
@@ -28,16 +32,29 @@ export const FOOTER_LINKS = [
     ],
   },
   {
-    title: 'Help',
+    title: 'About',
     links: [
-      { label: 'Shipping & Delivery', to: '/shipping' },
-      { label: 'Returns & Exchange', to: '/returns' },
-      { label: 'Jamdani Care Guide', to: '/care' },
-      { label: 'Contact Us', to: '/contact' },
+      { label: 'Our Story', to: '/our-story' },
+      { label: 'About Us', to: '/about' },
       { label: 'Photo Credits', to: '/credits' },
     ],
   },
+  {
+    title: 'Help',
+    links: [
+      { label: 'Contact Us', to: '/contact' },
+      { label: 'Delivery', to: '/contact#delivery' },
+      { label: 'Exchange', to: '/contact#exchange' },
+      { label: 'Jamdani Care Guide', to: '/contact#care' },
+    ],
+  },
 ]
+
+// Exchange rule shown on product, About and Contact pages (placeholder until confirmed).
+export const EXCHANGE_POLICY = {
+  short: 'Within 3 days if unworn, with tags',
+  days: 3,
+}
 
 export const PAYMENT_METHODS = ['Cash on Delivery', 'bKash', 'Nagad', 'Cards']
 

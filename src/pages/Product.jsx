@@ -8,11 +8,12 @@ import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import ProductCard from '../components/ui/ProductCard.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
-import { BRAND } from '../config/brand.js'
+import { BRAND, EXCHANGE_POLICY } from '../config/brand.js'
 import { JAMDANI_SPECS } from '../config/jamdani.js'
 import { useCart } from '../context/cart.js'
 import { useCatalog } from '../context/catalog.js'
 import { collections } from '../data/collections.js'
+import { deliveryRows } from '../utils/contact.js'
 import { formatPrice } from '../utils/formatPrice.js'
 import { isSoldOut } from '../utils/product.js'
 import { productWhatsappMessage, whatsappLink } from '../utils/whatsapp.js'
@@ -210,13 +211,15 @@ export default function Product() {
                 <Accordion title="Delivery & exchange">
                   <Specs
                     rows={[
-                      ['Inside Dhaka', '1–2 days · free'],
-                      ['Outside Dhaka', '2–5 days · ৳ 150'],
+                      ...deliveryRows(),
                       ['Payment', 'Cash on delivery, bKash, Nagad'],
-                      ['Exchange', 'Within 3 days if unworn, with tags'],
+                      ['Exchange', EXCHANGE_POLICY.short],
                     ]}
                   />
                 </Accordion>
+                <Link to="/contact#delivery" className="mt-4 inline-block text-xs uppercase tracking-[0.2em] text-primary hover:underline">
+                  Delivery & exchange details
+                </Link>
               </div>
             </div>
           </div>

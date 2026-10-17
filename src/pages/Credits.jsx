@@ -4,7 +4,7 @@ import { photoCredits } from '../data/photoCredits.js'
 export default function Credits() {
   return (
     <div className="mx-auto max-w-3xl px-4 py-16 md:py-24">
-      <SectionHeading eyebrow="Credits" title="Photo credits">
+      <SectionHeading as="h1" eyebrow="Credits" title="Photo credits">
         Some photographs on this site are used under Creative Commons licences from Wikimedia Commons.
       </SectionHeading>
 

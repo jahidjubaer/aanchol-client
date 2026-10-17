@@ -66,6 +66,19 @@ export default function MobileMenu({ open, onClose }) {
                 ))}
               </ul>
 
+              <ul className="mt-6 flex gap-6 text-xs uppercase tracking-[0.2em]">
+                {[
+                  { label: 'About Us', to: '/about' },
+                  { label: 'Contact', to: '/contact' },
+                ].map((link) => (
+                  <li key={link.to}>
+                    <NavLink to={link.to} onClick={onClose} className={({ isActive }) => `py-2 ${isActive ? 'text-primary' : 'opacity-75'}`}>
+                      {link.label}
+                    </NavLink>
+                  </li>
+                ))}
+              </ul>
+
               <div className="mt-8 grid grid-cols-2 gap-3 text-xs uppercase tracking-[0.2em]">
                 <a href="#" className="flex items-center gap-2 py-2">
                   <User size={16} strokeWidth={1.4} /> Account
