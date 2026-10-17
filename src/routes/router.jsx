@@ -13,7 +13,7 @@ import Product from '../pages/Product.jsx'
 import StyleGuide from '../pages/StyleGuide.jsx'
 import Wishlist from '../pages/Wishlist.jsx'
 
-// Admin pages load separately, so shoppers never download them.
+// Admin and account pages load separately, so shoppers only download them when needed.
 const lazyPage = (load) => async () => ({ Component: (await load()).default })
 
 export const router = createBrowserRouter([
@@ -29,6 +29,18 @@ export const router = createBrowserRouter([
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
       { path: 'wishlist', element: <Wishlist /> },
+      { path: 'account/login', lazy: lazyPage(() => import('../pages/account/SignIn.jsx')) },
+      { path: 'account/reset', lazy: lazyPage(() => import('../pages/account/ResetPassword.jsx')) },
+      {
+        path: 'account',
+        lazy: lazyPage(() => import('../pages/account/AccountLayout.jsx')),
+        children: [
+          { index: true, lazy: lazyPage(() => import('../pages/account/AccountOrders.jsx')) },
+          { path: 'orders/:id', lazy: lazyPage(() => import('../pages/account/AccountOrder.jsx')) },
+          { path: 'addresses', lazy: lazyPage(() => import('../pages/account/AccountAddresses.jsx')) },
+          { path: 'profile', lazy: lazyPage(() => import('../pages/account/AccountProfile.jsx')) },
+        ],
+      },
       { path: 'checkout', element: <Checkout /> },
       { path: 'order-confirmed', element: <OrderConfirmed /> },
       { path: 'style-guide', element: <StyleGuide /> },
@@ -46,6 +58,8 @@ export const router = createBrowserRouter([
       { path: 'products', lazy: lazyPage(() => import('../pages/admin/AdminProducts.jsx')) },
       { path: 'products/new', lazy: lazyPage(() => import('../pages/admin/AdminProductEdit.jsx')) },
       { path: 'products/:slug', lazy: lazyPage(() => import('../pages/admin/AdminProductEdit.jsx')) },
+      { path: 'customers', lazy: lazyPage(() => import('../pages/admin/AdminCustomers.jsx')) },
+      { path: 'customers/:id', lazy: lazyPage(() => import('../pages/admin/AdminCustomer.jsx')) },
       { path: 'home', lazy: lazyPage(() => import('../pages/admin/AdminHome.jsx')) },
       { path: 'home/slides/new', lazy: lazyPage(() => import('../pages/admin/AdminSlideEdit.jsx')) },
       { path: 'home/slides/:id', lazy: lazyPage(() => import('../pages/admin/AdminSlideEdit.jsx')) },

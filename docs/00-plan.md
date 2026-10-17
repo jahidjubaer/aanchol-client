@@ -42,7 +42,8 @@ Brand name: **not final**. `Aanchol` (আঁচল) is used as a placeholder and
 6. ✅ Deploy: shop on Vercel (`11`), API on Render (server `05`) · connect the domain
 7. ✅ Admin-managed storefront: categories, hero slider, campaign popup + automatic discounts, home layout, wishlist (`12`, `13`, server `06`)
 8. Payments: COD first, then bKash / SSLCommerz
-9. Customer accounts (wishlist and orders follow the customer across devices)
+9. ✅ Customer accounts: phone + password, orders, addresses, synced wishlist, admin Customers tab (`14`, server `07`)
+10. Before launch: `npm run sample:remove` in the server, real photos, real contact details, domain
 
 ## Working rules
 - Routine decisions are made during the work; important ones (money, policies, brand, accounts) are confirmed with the owner first.

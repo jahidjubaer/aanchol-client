@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND } from '../../config/brand.js'
+import { useAccount } from '../../context/account.js'
 import { useWishlist } from '../../context/wishlist.js'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll.js'
 import { useNavLinks } from '../../hooks/useNavLinks.js'
@@ -13,6 +14,7 @@ export default function MobileMenu({ open, onClose }) {
   useLockBodyScroll(open)
   const navLinks = useNavLinks()
   const { count: wishlistCount } = useWishlist()
+  const { signedIn } = useAccount()
 
   useEffect(() => {
     if (!open) return
@@ -84,9 +86,9 @@ export default function MobileMenu({ open, onClose }) {
               </ul>
 
               <div className="mt-8 grid grid-cols-2 gap-3 text-xs uppercase tracking-[0.2em]">
-                <a href="#" className="flex items-center gap-2 py-2">
-                  <User size={16} strokeWidth={1.4} /> Account
-                </a>
+                <Link to="/account" onClick={onClose} className="flex items-center gap-2 py-2">
+                  <User size={16} strokeWidth={1.4} /> {signedIn ? 'My account' : 'Sign in'}
+                </Link>
                 <Link to="/wishlist" onClick={onClose} className="flex items-center gap-2 py-2">
                   <Heart size={16} strokeWidth={1.4} /> Wishlist{wishlistCount > 0 && ` (${wishlistCount})`}
                 </Link>

@@ -2,6 +2,7 @@ import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
 import { BRAND } from '../../config/brand.js'
+import { useAccount } from '../../context/account.js'
 import { useCart } from '../../context/cart.js'
 import { useWishlist } from '../../context/wishlist.js'
 import { useAnnouncements, useNavLinks } from '../../hooks/useNavLinks.js'
@@ -27,6 +28,7 @@ function IconButton({ label, children, className = '', ...props }) {
 export default function Navbar() {
   const { count: cartCount, openCart } = useCart()
   const { count: wishlistCount } = useWishlist()
+  const { signedIn, customer } = useAccount()
   const navLinks = useNavLinks()
   const announcements = useAnnouncements()
   const [menuOpen, setMenuOpen] = useState(false)
@@ -86,9 +88,14 @@ export default function Navbar() {
             <IconButton label="Search" className="hidden md:grid">
               <Search {...iconProps} />
             </IconButton>
-            <IconButton label="Account" className="hidden md:grid">
+            <Link
+              to="/account"
+              aria-label={signedIn ? `My account (${customer?.name ?? ''})` : 'Sign in'}
+              className="relative hidden size-10 place-items-center transition hover:text-primary md:grid"
+            >
               <User {...iconProps} />
-            </IconButton>
+              {signedIn && <span className="absolute right-2 top-2 size-1.5 rounded-full bg-gold" aria-hidden="true" />}
+            </Link>
             <Link
               to="/wishlist"
               aria-label={`Wishlist, ${wishlistCount} saved`}

@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
+import { useAccount } from '../context/account.js'
 import { useCart } from '../context/cart.js'
 import { useCatalog } from '../context/catalog.js'
 import { useSite } from '../context/site.js'
@@ -13,6 +14,22 @@ import { formatPrice } from '../utils/formatPrice.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 const EMPTY_FORM = { name: '', phone: '', email: '', city: '', address: '', note: '', delivery: 'inside-dhaka' }
+
+// Signed-in customers start with their default address filled in.
+function startingForm(customer) {
+  if (!customer) return EMPTY_FORM
+  const saved = customer.addresses.find((a) => a.id === customer.defaultAddress) ?? customer.addresses[0]
+  return {
+    ...EMPTY_FORM,
+    name: saved?.name ?? customer.name,
+    phone: saved?.phone ?? customer.phone,
+    email: customer.email ?? '',
+    city: saved?.city ?? '',
+    address: saved?.address ?? '',
+  }
+}
+
+const sameAddress = (a, form) => a.city.trim() === form.city.trim() && a.address.trim() === form.address.trim() && a.phone === form.phone.replace(/[\s-]/g, '')
 
 function Field({ label, error, optional, children }) {
   return (
@@ -42,7 +59,10 @@ export default function Checkout() {
   const catalog = useCatalog()
   const site = useSite()
   const navigate = useNavigate()
-  const [form, setForm] = useState(EMPTY_FORM)
+  const account = useAccount()
+  const savedAddresses = account.customer?.addresses ?? []
+  const [form, setForm] = useState(() => startingForm(account.customer))
+  const [saveAddress, setSaveAddress] = useState(savedAddresses.length === 0)
   const [errors, setErrors] = useState({})
   const [touched, setTouched] = useState(false)
   const [summaryOpen, setSummaryOpen] = useState(false)
@@ -98,15 +118,28 @@ export default function Checkout() {
     setSubmitting(true)
     try {
       // The server checks stock and works out prices itself; only slugs and quantities are sent.
-      const order = await placeOrder({
-        customer: { name: form.name, phone: form.phone, email: form.email, city: form.city, address: form.address, note: form.note },
-        delivery: form.delivery,
-        items: items.map((i) => ({ slug: i.slug, qty: i.qty })),
-        // Lets the server refuse the order if prices changed (e.g. a sale ended) since the bag was shown.
-        expectedSubtotal: subtotal,
-      })
+      const order = await placeOrder(
+        {
+          customer: { name: form.name, phone: form.phone, email: form.email, city: form.city, address: form.address, note: form.note },
+          delivery: form.delivery,
+          items: items.map((i) => ({ slug: i.slug, qty: i.qty })),
+          // Lets the server refuse the order if prices changed (e.g. a sale ended) since the bag was shown.
+          expectedSubtotal: subtotal,
+        },
+        account.token,
+      )
+      // Saving the address is a convenience: the order is already placed if this fails.
+      if (account.signedIn && saveAddress && !savedAddresses.some((a) => sameAddress(a, form))) {
+        account
+          .call('/api/account/addresses', {
+            method: 'POST',
+            body: JSON.stringify({ label: savedAddresses.length ? '' : 'Home', name: form.name, phone: form.phone, city: form.city, address: form.address }),
+          })
+          .then((res) => account.setCustomer(res.customer))
+          .catch(() => {})
+      }
       clear()
-      navigate('/order-confirmed', { state: { order }, replace: true })
+      navigate('/order-confirmed', { state: { order, guest: !account.signedIn }, replace: true })
     } catch (err) {
       setSubmitting(false)
       if (err.body.fields) setErrors(err.body.fields)
@@ -157,6 +190,15 @@ export default function Checkout() {
         <div className="mt-10 lg:grid lg:grid-cols-[1fr_380px] lg:gap-16">
           <form onSubmit={submit} noValidate>
             <Section step="01" title="Contact">
+              {!account.signedIn && (
+                <p className="mb-5 border border-base-300 bg-base-200/60 px-4 py-3 text-sm">
+                  Have an account?{' '}
+                  <Link to="/account/login" state={{ next: '/checkout' }} className="text-primary underline underline-offset-4">
+                    Sign in
+                  </Link>{' '}
+                  for a faster checkout, or continue as a guest.
+                </p>
+              )}
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field label="Full name" error={errors.name}>
                   <input name="name" autoComplete="name" value={form.name} onChange={set('name')} className={inputClass('name')} />
@@ -207,6 +249,25 @@ export default function Checkout() {
                 ))}
               </div>
               <div className="mt-4 grid gap-4">
+                {savedAddresses.length > 0 && (
+                  <div>
+                    <span className="mb-1.5 block text-xs uppercase tracking-[0.15em]">Saved addresses</span>
+                    <div className="flex flex-wrap gap-2">
+                      {savedAddresses.map((a) => (
+                        <button
+                          key={a.id}
+                          type="button"
+                          onClick={() => setForm((f) => ({ ...f, name: a.name, phone: a.phone, city: a.city, address: a.address }))}
+                          aria-pressed={sameAddress(a, form)}
+                          className={`border px-3 py-2 text-left text-xs ${sameAddress(a, form) ? 'border-primary bg-primary/5 text-primary' : 'border-base-300'}`}
+                        >
+                          <span className="block uppercase tracking-[0.15em]">{a.label || a.city}</span>
+                          <span className="block max-w-48 truncate normal-case opacity-70">{a.address}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <Field label="City / District" error={errors.city}>
                   <input name="city" autoComplete="address-level2" value={form.city} onChange={set('city')} className={inputClass('city')} />
                 </Field>
@@ -221,6 +282,12 @@ export default function Checkout() {
                     className={`textarea w-full ${errors.address ? 'textarea-error' : ''}`}
                   />
                 </Field>
+                {account.signedIn && !savedAddresses.some((a) => sameAddress(a, form)) && savedAddresses.length < 5 && (
+                  <label className="flex cursor-pointer items-center gap-3 text-sm">
+                    <input type="checkbox" checked={saveAddress} onChange={(e) => setSaveAddress(e.target.checked)} className="checkbox checkbox-sm checkbox-primary" />
+                    Save this address to my account
+                  </label>
+                )}
                 <Field label="Note for us" optional>
                   <textarea name="note" rows={2} value={form.note} onChange={set('note')} className="textarea w-full" />
                 </Field>

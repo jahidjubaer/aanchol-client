@@ -24,7 +24,9 @@ export async function request(path, options = {}) {
   return body
 }
 
-export async function placeOrder(payload) {
-  const { order } = await request('/api/orders', { method: 'POST', body: JSON.stringify(payload) })
+// With a token the order is saved to the customer's account; without one it's a guest order.
+export async function placeOrder(payload, token) {
+  const headers = token ? { Authorization: `Bearer ${token}` } : {}
+  const { order } = await request('/api/orders', { method: 'POST', body: JSON.stringify(payload), headers })
   return order
 }

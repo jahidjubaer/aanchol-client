@@ -1,6 +1,7 @@
 import { ChevronLeft, ChevronRight, RefreshCw, Search } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
+import SampleBadge from '../../components/admin/SampleBadge.jsx'
 import StatusBadge from '../../components/admin/StatusBadge.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAdminData } from '../../hooks/useAdminData.js'
@@ -33,6 +34,7 @@ function OrderRow({ order }) {
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span className="text-sm tracking-[0.12em]">{order.id}</span>
             <StatusBadge status={order.status} />
+            {order.sample && <SampleBadge />}
           </div>
           <p className="mt-1.5 truncate">{order.customer.name}</p>
           <p className="truncate text-xs opacity-60">

@@ -1,8 +1,9 @@
 import { Heart } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { EASE_LUXE } from '../utils/motion.js'
+import { useAccount } from './account.js'
 import { useCatalog } from './catalog.js'
 import { WishlistContext } from './wishlist.js'
 
@@ -17,11 +18,14 @@ function readStored() {
   }
 }
 
-// Saved pieces, kept in this browser (newest first). Moves to the customer's account once accounts exist.
+// Saved pieces (newest first). Kept in this browser; when signed in, also in the account,
+// so the list follows the customer to other devices.
 export default function WishlistProvider({ children }) {
   const [slugs, setSlugs] = useState(readStored)
   const [toast, setToast] = useState(null)
   const { getProduct } = useCatalog()
+  const { signedIn, token, call, serverWishlist, setServerWishlist } = useAccount()
+  const syncedToken = useRef(null) // the login whose list has been merged with this device's
 
   useEffect(() => {
     try {
@@ -38,24 +42,61 @@ export default function WishlistProvider({ children }) {
     return () => window.removeEventListener('storage', onStorage)
   }, [])
 
+  // After signing in: pieces saved on this device join the account's list.
+  useEffect(() => {
+    if (!signedIn || !serverWishlist || syncedToken.current === token) return
+    syncedToken.current = token
+    const local = readStored()
+    const needsMerge = local.some((s) => !serverWishlist.includes(s))
+    const merged = needsMerge
+      ? call('/api/account/wishlist/merge', { method: 'POST', body: JSON.stringify({ wishlist: local }) })
+      : Promise.resolve({ wishlist: serverWishlist })
+    merged
+      .then((body) => {
+        setSlugs(body.wishlist)
+        if (needsMerge) setServerWishlist(body.wishlist)
+      })
+      .catch(() => setSlugs([...new Set([...local, ...serverWishlist])]))
+  }, [signedIn, token, serverWishlist, call, setServerWishlist])
+
+  // Signing out clears the list from this device (it stays safe in the account).
+  const wasSignedIn = useRef(signedIn)
+  useEffect(() => {
+    if (wasSignedIn.current && !signedIn) {
+      syncedToken.current = null
+      setSlugs([])
+    }
+    wasSignedIn.current = signedIn
+  }, [signedIn])
+
   useEffect(() => {
     if (!toast) return
     const timer = setTimeout(() => setToast(null), 2600)
     return () => clearTimeout(timer)
   }, [toast])
 
+  const save = useCallback(
+    (next) => {
+      setSlugs(next)
+      if (signedIn && syncedToken.current === token) {
+        call('/api/account/wishlist', { method: 'PUT', body: JSON.stringify({ wishlist: next }) }).catch(() => {
+          // Kept on this device; it's merged into the account at the next sign-in.
+        })
+      }
+    },
+    [signedIn, token, call],
+  )
+
   const toggle = useCallback(
     (product) => {
       const saved = slugs.includes(product.slug)
-      setSlugs((current) =>
-        saved ? current.filter((s) => s !== product.slug) : [product.slug, ...current.filter((s) => s !== product.slug)],
-      )
+      save(saved ? slugs.filter((s) => s !== product.slug) : [product.slug, ...slugs])
       setToast(saved ? null : { name: product.name, key: Date.now() })
     },
-    [slugs],
+    [slugs, save],
   )
 
-  const remove = useCallback((slug) => setSlugs((current) => current.filter((s) => s !== slug)), [])
+  const remove = useCallback((slug) => save(slugs.filter((s) => s !== slug)), [slugs, save])
 
   const value = useMemo(() => {
     // Pieces no longer in the shop are skipped, but kept in case they come back.

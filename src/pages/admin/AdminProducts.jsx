@@ -1,6 +1,7 @@
 import { ChevronRight, Plus, Search } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router'
+import SampleBadge from '../../components/admin/SampleBadge.jsx'
 import WovenImage from '../../components/ui/WovenImage.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAdminData } from '../../hooks/useAdminData.js'
@@ -110,7 +111,10 @@ export default function AdminProducts() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-display text-lg leading-tight">{p.name}</p>
+                  <p className="flex items-center gap-2">
+                    <span className="truncate font-display text-lg leading-tight">{p.name}</span>
+                    {p.sample && <SampleBadge />}
+                  </p>
                   <p className="mt-1 text-sm">{formatPrice(p.price)}</p>
                   <p className="text-xs">
                     <StockNote product={p} />

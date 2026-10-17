@@ -8,7 +8,7 @@ import { formatPrice } from '../utils/formatPrice.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 export default function OrderConfirmed() {
-  const order = useLocation().state?.order
+  const { order, guest } = useLocation().state ?? {}
   if (!order) return <Navigate to="/" replace />
   const saved = order.items.reduce((sum, i) => sum + ((i.listPrice ?? i.price) - i.price) * i.qty, 0)
 
@@ -59,6 +59,20 @@ export default function OrderConfirmed() {
           {order.customer.address}, {order.customer.city}
         </p>
       </Reveal>
+
+      {guest && (
+        <Reveal delay={0.2} className="mt-8 border border-secondary/40 bg-secondary/5 p-5 text-left text-sm">
+          <p className="font-display text-xl">Track this order</p>
+          <p className="mt-1 opacity-75">Create an account with {order.customer.phone} and this order is saved to it, with every update.</p>
+          <Link
+            to="/account/login"
+            state={{ mode: 'register', name: order.customer.name, phone: order.customer.phone, claim: order.id }}
+            className="btn btn-outline btn-sm mt-4 uppercase tracking-[0.15em]"
+          >
+            Create account
+          </Link>
+        </Reveal>
+      )}
 
       <Reveal delay={0.25} className="mt-8 grid gap-3 sm:grid-cols-2">
         <a

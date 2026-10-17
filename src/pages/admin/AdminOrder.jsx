@@ -1,6 +1,7 @@
 import { ArrowLeft, Check, MessageCircle, Phone } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useParams } from 'react-router'
+import SampleBadge from '../../components/admin/SampleBadge.jsx'
 import StatusBadge from '../../components/admin/StatusBadge.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAdminAuth } from '../../context/adminAuth.js'
@@ -159,9 +160,18 @@ export default function AdminOrder() {
       <div className="mt-4 flex flex-wrap items-center gap-3">
         <h1 className="font-sans text-2xl tracking-[0.12em] md:text-3xl">{order.id}</h1>
         <StatusBadge status={order.status} className="text-xs" />
+        {order.sample && <SampleBadge />}
       </div>
       <p className="mt-1 text-sm opacity-60">
         Placed {formatDateTime(order.createdAt)} · {timeAgo(order.createdAt)}
+        {order.customerId && (
+          <>
+            {' · '}
+            <Link to={`/admin/customers/${order.customerId}`} className="text-primary underline underline-offset-4">
+              customer account
+            </Link>
+          </>
+        )}
       </p>
 
       <div className="mt-6 grid gap-4">

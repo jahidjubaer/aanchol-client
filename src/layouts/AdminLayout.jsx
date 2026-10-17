@@ -7,6 +7,7 @@ import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
 const SECTIONS = [
   { to: '/admin', label: 'Orders', match: (p) => p === '/admin' || p.startsWith('/admin/orders') },
   { to: '/admin/products', label: 'Products', match: (p) => p.startsWith('/admin/products') },
+  { to: '/admin/customers', label: 'Customers', match: (p) => p.startsWith('/admin/customers') },
   { to: '/admin/home', label: 'Home page', match: (p) => p.startsWith('/admin/home') },
   { to: '/admin/campaigns', label: 'Campaigns', match: (p) => p.startsWith('/admin/campaigns') },
   { to: '/admin/categories', label: 'Categories', match: (p) => p.startsWith('/admin/categories') },
