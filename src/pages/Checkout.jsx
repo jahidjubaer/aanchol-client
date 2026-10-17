@@ -5,6 +5,8 @@ import OrderSummary from '../components/checkout/OrderSummary.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
 import { useCart } from '../context/cart.js'
+import { useCatalog } from '../context/catalog.js'
+import { useSite } from '../context/site.js'
 import { placeOrder } from '../utils/api.js'
 import { validateCheckout } from '../utils/checkout.js'
 import { formatPrice } from '../utils/formatPrice.js'
@@ -37,6 +39,8 @@ function Section({ step, title, children }) {
 
 export default function Checkout() {
   const { items, lines, ready, subtotal, clear, setQty } = useCart()
+  const catalog = useCatalog()
+  const site = useSite()
   const navigate = useNavigate()
   const [form, setForm] = useState(EMPTY_FORM)
   const [errors, setErrors] = useState({})
@@ -98,13 +102,19 @@ export default function Checkout() {
         customer: { name: form.name, phone: form.phone, email: form.email, city: form.city, address: form.address, note: form.note },
         delivery: form.delivery,
         items: items.map((i) => ({ slug: i.slug, qty: i.qty })),
+        // Lets the server refuse the order if prices changed (e.g. a sale ended) since the bag was shown.
+        expectedSubtotal: subtotal,
       })
       clear()
       navigate('/order-confirmed', { state: { order }, replace: true })
     } catch (err) {
       setSubmitting(false)
       if (err.body.fields) setErrors(err.body.fields)
-      if (err.status === 409 && err.body.items) {
+      if (err.status === 409 && err.body.code === 'PRICE_CHANGED') {
+        catalog.retry()
+        site.refresh()
+        setFormError(`${err.message} Nothing has been ordered yet.`)
+      } else if (err.status === 409 && err.body.items) {
         err.body.items.forEach((i) => setQty(i.slug, i.available))
         setFormError(`${err.message} We've updated your bag; please check it and place the order again.`)
       } else {

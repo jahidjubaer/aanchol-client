@@ -5,7 +5,6 @@ export const BRAND = {
   tagline: 'Handwoven Heritage',
   // What the name means, shown on the About page. Rewrite if the name changes.
   meaning: 'is the loose end of a sari, the part that falls over the shoulder and carries its finest weaving.',
-  announcement: ['Cash on delivery across Bangladesh', 'Free delivery inside Dhaka'],
   // PLACEHOLDER contact details, replace before launch. The 011 range has no active
   // operator in Bangladesh, so these numbers can't reach a real person by mistake.
   phone: '+880 1123-456789',
@@ -18,21 +17,8 @@ export const BRAND = {
   ],
 }
 
-export const NAV_LINKS = [
-  { label: 'Jamdani', bangla: 'জামদানি', to: '/collections/jamdani' },
-  { label: 'Jewellery', bangla: 'গয়না', to: '/collections/jewellery' },
-  { label: 'Our Story', bangla: 'আমাদের গল্প', to: '/our-story' },
-]
-
+// Shop links (categories) come from the admin, see components/layout/Footer.jsx.
 export const FOOTER_LINKS = [
-  {
-    title: 'Shop',
-    links: [
-      { label: 'Tangail Jamdani', to: '/collections/jamdani' },
-      { label: 'Jewellery', to: '/collections/jewellery' },
-      { label: 'New Arrivals', to: '/collections/new' },
-    ],
-  },
   {
     title: 'About',
     links: [

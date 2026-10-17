@@ -10,6 +10,7 @@ import { whatsappLink } from '../utils/whatsapp.js'
 export default function OrderConfirmed() {
   const order = useLocation().state?.order
   if (!order) return <Navigate to="/" replace />
+  const saved = order.items.reduce((sum, i) => sum + ((i.listPrice ?? i.price) - i.price) * i.qty, 0)
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16 text-center md:py-24">
@@ -36,6 +37,12 @@ export default function OrderConfirmed() {
               <span>{formatPrice(i.price * i.qty)}</span>
             </li>
           ))}
+          {saved > 0 && (
+            <li className="flex justify-between gap-4 text-primary">
+              <span>{order.campaign?.title ?? 'Sale discount'}</span>
+              <span>You saved {formatPrice(saved)}</span>
+            </li>
+          )}
           <li className="flex justify-between gap-4 opacity-70">
             <span>Delivery · {order.delivery.label}</span>
             <span>{order.delivery.fee ? formatPrice(order.delivery.fee) : 'Free'}</span>

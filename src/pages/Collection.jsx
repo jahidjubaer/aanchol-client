@@ -9,20 +9,22 @@ import ProductCard from '../components/ui/ProductCard.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import Sheet from '../components/ui/Sheet.jsx'
 import { useCatalog } from '../context/catalog.js'
-import { collections } from '../data/collections.js'
+import { useSite } from '../context/site.js'
+import { findCollection } from '../utils/collections.js'
+import { imageSrc } from '../utils/image.js'
 import { EASE_LUXE } from '../utils/motion.js'
-import { applyFilters, getFilterOptions, PRICE_RANGES, SORT_OPTIONS } from '../utils/productFilters.js'
+import { applyFilters, FILTER_KEYS, getFilterOptions, PRICE_RANGES, SORT_OPTIONS } from '../utils/productFilters.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 import NotFound from './NotFound.jsx'
-
-const FILTER_KEYS = ['fabric', 'color', 'price']
 
 function readFilters(params) {
   return Object.fromEntries(FILTER_KEYS.map((k) => [k, params.get(k)?.split(',').filter(Boolean) ?? []]))
 }
 
-function filterLabel(key, value) {
-  return key === 'price' ? PRICE_RANGES.find((r) => r.id === value)?.label : value
+function filterLabel(key, value, types) {
+  if (key === 'price') return PRICE_RANGES.find((r) => r.id === value)?.label
+  if (key === 'type') return types.find((t) => t.slug === value)?.label ?? value
+  return value
 }
 
 function Banner({ collection }) {
@@ -39,7 +41,7 @@ function Banner({ collection }) {
   return (
     <div className="relative h-[42svh] min-h-[300px] overflow-hidden md:h-[52vh]">
       <motion.img
-        src={collection.banner}
+        src={imageSrc(collection.banner, 1800)}
         alt=""
         className="absolute inset-0 size-full object-cover"
         initial={{ scale: 1.1 }}
@@ -80,18 +82,27 @@ function ComingSoon({ collection }) {
 
 export default function Collection() {
   const { slug } = useParams()
-  const collection = collections[slug]
+  const site = useSite()
+  const collection = useMemo(() => findCollection(slug, site.categories), [slug, site.categories])
   const [params, setParams] = useSearchParams()
   const [sheetOpen, setSheetOpen] = useState(false)
   const { products, status } = useCatalog()
 
   const allItems = useMemo(() => collection?.items(products) ?? [], [collection, products])
-  const options = useMemo(() => getFilterOptions(allItems), [allItems])
+  const options = useMemo(() => getFilterOptions(allItems, collection?.types), [allItems, collection])
   const filters = readFilters(params)
   const sort = params.get('sort') ?? 'featured'
   const visible = applyFilters(allItems, filters, sort)
   const activeCount = FILTER_KEYS.reduce((n, k) => n + filters[k].length, 0)
 
+  // A new category may not be in the saved copy yet; wait for the server before saying it doesn't exist.
+  if (!collection && site.status === 'loading') {
+    return (
+      <div className="grid place-items-center py-32" role="status" aria-label="Loading">
+        <span className="loading loading-spinner" />
+      </div>
+    )
+  }
   if (!collection) return <NotFound />
 
   const update = (mutate) => {
@@ -172,7 +183,7 @@ export default function Collection() {
                   onClick={() => toggle(k, v)}
                   className="inline-flex items-center gap-1.5 border border-base-300 bg-base-200 px-3 py-1.5 text-xs"
                 >
-                  {filterLabel(k, v)} <X size={12} />
+                  {filterLabel(k, v, collection.types)} <X size={12} />
                 </button>
               )),
             )}

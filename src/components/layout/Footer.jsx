@@ -1,11 +1,23 @@
 import { Link } from 'react-router'
 import { BRAND, FOOTER_LINKS, PAYMENT_METHODS } from '../../config/brand.js'
+import { useSite } from '../../context/site.js'
+import { collectionPath } from '../../utils/collections.js'
 import JamdaniDivider from '../ui/JamdaniDivider.jsx'
 import MotifBand from '../ui/MotifBand.jsx'
 
 const YEAR = new Date().getFullYear()
 
 export default function Footer() {
+  const { categories } = useSite()
+  const shopLinks = {
+    title: 'Shop',
+    links: [
+      ...categories.map((c) => ({ label: c.name, to: collectionPath(c.slug) })),
+      { label: 'New Arrivals', to: collectionPath('new') },
+      { label: 'Wishlist', to: '/wishlist' },
+    ],
+  }
+
   return (
     <footer className="bg-neutral text-neutral-content">
       <MotifBand className="h-3 text-gold/60" />
@@ -21,7 +33,7 @@ export default function Footer() {
           </div>
 
           <div className="grid grid-cols-2 gap-8 md:contents">
-            {FOOTER_LINKS.map((group) => (
+            {[shopLinks, ...FOOTER_LINKS].map((group) => (
               <div key={group.title}>
                 <p className="eyebrow text-gold-light">{group.title}</p>
                 <ul className="mt-4 space-y-3 text-sm">

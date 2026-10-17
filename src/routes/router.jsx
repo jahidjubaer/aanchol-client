@@ -11,6 +11,7 @@ import OrderConfirmed from '../pages/OrderConfirmed.jsx'
 import OurStory from '../pages/OurStory.jsx'
 import Product from '../pages/Product.jsx'
 import StyleGuide from '../pages/StyleGuide.jsx'
+import Wishlist from '../pages/Wishlist.jsx'
 
 // Admin pages load separately, so shoppers never download them.
 const lazyPage = (load) => async () => ({ Component: (await load()).default })
@@ -27,6 +28,7 @@ export const router = createBrowserRouter([
       { path: 'our-story', element: <OurStory /> },
       { path: 'about', element: <About /> },
       { path: 'contact', element: <Contact /> },
+      { path: 'wishlist', element: <Wishlist /> },
       { path: 'checkout', element: <Checkout /> },
       { path: 'order-confirmed', element: <OrderConfirmed /> },
       { path: 'style-guide', element: <StyleGuide /> },

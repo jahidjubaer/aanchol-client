@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import CartDrawer from '../components/cart/CartDrawer.jsx'
 import { useCatalog } from './catalog.js'
 import { EASE_LUXE } from '../utils/motion.js'
+import { unitPrice } from '../utils/product.js'
 import { CartContext } from './cart.js'
 
 const STORAGE_KEY = 'aanchol-cart'
@@ -75,7 +76,7 @@ export default function CartProvider({ children }) {
       items,
       ready: catalogStatus === 'ready',
       count: items.reduce((sum, l) => sum + l.qty, 0),
-      subtotal: items.reduce((sum, l) => sum + l.qty * l.product.price, 0),
+      subtotal: items.reduce((sum, l) => sum + l.qty * unitPrice(l.product), 0),
       addItem,
       setQty,
       removeItem,

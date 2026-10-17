@@ -1,7 +1,7 @@
 import { MessageCircle } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { formatPrice } from '../../utils/formatPrice.js'
 import { EASE_LUXE } from '../../utils/motion.js'
+import Price from '../ui/Price.jsx'
 
 // Phone-only bar that slides up once the main buy buttons scroll out of view.
 export default function StickyBuyBar({ visible, product, onAdd, whatsappHref, addLabel, addDisabled }) {
@@ -18,7 +18,7 @@ export default function StickyBuyBar({ visible, product, onAdd, whatsappHref, ad
           <div className="flex items-center gap-3">
             <div className="min-w-0 flex-1">
               <p className="truncate font-display text-base leading-tight">{product.name}</p>
-              <p className="text-sm">{formatPrice(product.price)}</p>
+              <Price product={product} className="block text-sm" />
             </div>
             <a
               href={whatsappHref}

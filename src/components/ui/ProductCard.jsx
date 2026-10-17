@@ -1,18 +1,17 @@
-import { Heart } from 'lucide-react'
 import { motion } from 'motion/react'
-import { useState } from 'react'
 import { Link } from 'react-router'
-import { getSubtitle, isSoldOut } from '../../utils/product.js'
-import { formatPrice } from '../../utils/formatPrice.js'
+import { getSubtitle, isSoldOut, percentOff } from '../../utils/product.js'
 import { imageSrc, imageSrcSet } from '../../utils/image.js'
 import { EASE_LUXE } from '../../utils/motion.js'
+import Price from './Price.jsx'
+import WishlistButton from './WishlistButton.jsx'
 import WovenImage from './WovenImage.jsx'
 
 export default function ProductCard({ product }) {
-  const [liked, setLiked] = useState(false)
-  const { slug, name, price, compareAt, badge, images, colors } = product
+  const { slug, name, badge, images, colors } = product
   const [image, hoverImage] = images
   const soldOut = isSoldOut(product)
+  const off = product.salePrice !== undefined ? percentOff(product) : 0
 
   return (
     <article className="group">
@@ -50,21 +49,17 @@ export default function ProductCard({ product }) {
           <span className="absolute left-0 top-3 bg-neutral px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-neutral-content md:left-3">
             Sold out
           </span>
+        ) : off > 0 ? (
+          <span className="absolute left-0 top-3 bg-primary px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-primary-content md:left-3">
+            {off}% off
+          </span>
         ) : badge && (
           <span className="absolute left-0 top-3 bg-base-100/95 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] md:left-3">
             {badge}
           </span>
         )}
 
-        <button
-          type="button"
-          onClick={() => setLiked((v) => !v)}
-          aria-pressed={liked}
-          aria-label={liked ? 'Remove from wishlist' : 'Add to wishlist'}
-          className="absolute right-2 top-2 grid size-10 place-items-center rounded-full bg-base-100/80 backdrop-blur transition hover:bg-base-100"
-        >
-          <Heart size={18} strokeWidth={1.5} className={liked ? 'fill-primary text-primary' : ''} />
-        </button>
+        <WishlistButton product={product} className="absolute right-2 top-2" />
 
         <Link
           to={`/products/${slug}`}
@@ -82,8 +77,7 @@ export default function ProductCard({ product }) {
         </h3>
         <p className="mt-0.5 text-xs tracking-wide opacity-60 md:text-sm">{getSubtitle(product)}</p>
         <p className="mt-1.5 text-sm md:text-base">
-          <span className="font-normal">{formatPrice(price)}</span>
-          {compareAt && <span className="ml-2 text-xs line-through opacity-50">{formatPrice(compareAt)}</span>}
+          <Price product={product} className="font-normal" />
         </p>
       </div>
     </article>

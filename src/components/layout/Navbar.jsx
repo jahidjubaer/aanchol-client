@@ -1,8 +1,10 @@
 import { Heart, Menu, Search, ShoppingBag, User } from 'lucide-react'
 import { useState } from 'react'
 import { Link, NavLink } from 'react-router'
-import { BRAND, NAV_LINKS } from '../../config/brand.js'
+import { BRAND } from '../../config/brand.js'
 import { useCart } from '../../context/cart.js'
+import { useWishlist } from '../../context/wishlist.js'
+import { useAnnouncements, useNavLinks } from '../../hooks/useNavLinks.js'
 import { useScrolled } from '../../hooks/useScrolled.js'
 import MotifBand from '../ui/MotifBand.jsx'
 import MobileMenu from './MobileMenu.jsx'
@@ -24,15 +26,20 @@ function IconButton({ label, children, className = '', ...props }) {
 
 export default function Navbar() {
   const { count: cartCount, openCart } = useCart()
+  const { count: wishlistCount } = useWishlist()
+  const navLinks = useNavLinks()
+  const announcements = useAnnouncements()
   const [menuOpen, setMenuOpen] = useState(false)
   const scrolled = useScrolled()
 
   return (
     <>
-      <div className="bg-primary px-4 py-2 text-center text-[11px] tracking-[0.15em] text-primary-content md:text-xs">
-        {BRAND.announcement[0]}
-        <span className="hidden sm:inline"> · {BRAND.announcement[1]}</span>
-      </div>
+      {announcements.length > 0 && (
+        <div className="bg-primary px-4 py-2 text-center text-[11px] tracking-[0.15em] text-primary-content md:text-xs">
+          {announcements[0]}
+          {announcements[1] && <span className="hidden sm:inline"> · {announcements[1]}</span>}
+        </div>
+      )}
 
       <header
         className={`sticky top-0 z-40 bg-base-100/95 backdrop-blur transition-shadow duration-500 ${
@@ -53,7 +60,7 @@ export default function Navbar() {
               <Search {...iconProps} />
             </IconButton>
             <ul className="hidden gap-8 text-xs uppercase tracking-[0.25em] md:flex">
-              {NAV_LINKS.map((link) => (
+              {navLinks.map((link) => (
                 <li key={link.to}>
                   <NavLink
                     to={link.to}
@@ -82,9 +89,18 @@ export default function Navbar() {
             <IconButton label="Account" className="hidden md:grid">
               <User {...iconProps} />
             </IconButton>
-            <IconButton label="Wishlist" className="hidden md:grid">
+            <Link
+              to="/wishlist"
+              aria-label={`Wishlist, ${wishlistCount} saved`}
+              className="relative grid size-10 place-items-center transition hover:text-primary"
+            >
               <Heart {...iconProps} />
-            </IconButton>
+              {wishlistCount > 0 && (
+                <span className="absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-primary text-[9px] text-primary-content">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             <IconButton label={`Cart, ${cartCount} items`} className="relative" onClick={openCart}>
               <ShoppingBag {...iconProps} />
               {cartCount > 0 && (

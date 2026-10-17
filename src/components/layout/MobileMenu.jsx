@@ -1,14 +1,18 @@
 import { Heart, MessageCircle, User, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect } from 'react'
-import { NavLink } from 'react-router'
-import { BRAND, NAV_LINKS } from '../../config/brand.js'
+import { Link, NavLink } from 'react-router'
+import { BRAND } from '../../config/brand.js'
+import { useWishlist } from '../../context/wishlist.js'
 import { useLockBodyScroll } from '../../hooks/useLockBodyScroll.js'
+import { useNavLinks } from '../../hooks/useNavLinks.js'
 import JamdaniDivider from '../ui/JamdaniDivider.jsx'
 import { EASE_LUXE } from '../../utils/motion.js'
 
 export default function MobileMenu({ open, onClose }) {
   useLockBodyScroll(open)
+  const navLinks = useNavLinks()
+  const { count: wishlistCount } = useWishlist()
 
   useEffect(() => {
     if (!open) return
@@ -45,7 +49,7 @@ export default function MobileMenu({ open, onClose }) {
 
             <nav className="flex-1 overflow-y-auto px-5 pt-6">
               <ul className="space-y-1">
-                {NAV_LINKS.map((link, i) => (
+                {navLinks.map((link, i) => (
                   <motion.li
                     key={link.to}
                     initial={{ opacity: 0, x: -16 }}
@@ -83,9 +87,9 @@ export default function MobileMenu({ open, onClose }) {
                 <a href="#" className="flex items-center gap-2 py-2">
                   <User size={16} strokeWidth={1.4} /> Account
                 </a>
-                <a href="#" className="flex items-center gap-2 py-2">
-                  <Heart size={16} strokeWidth={1.4} /> Wishlist
-                </a>
+                <Link to="/wishlist" onClick={onClose} className="flex items-center gap-2 py-2">
+                  <Heart size={16} strokeWidth={1.4} /> Wishlist{wishlistCount > 0 && ` (${wishlistCount})`}
+                </Link>
               </div>
             </nav>
 

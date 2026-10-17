@@ -25,35 +25,52 @@ function Option({ checked, onChange, children }) {
   )
 }
 
-// options: { fabric: string[], color: string[], price: {id,label}[] }
-// filters: { fabric: string[], color: string[], price: string[] }
+// options: { type: {id,label}[], fabric: string[], color: string[], price: {id,label}[] }
+// filters: { type: string[], fabric: string[], color: string[], price: string[] }
+// A group only shows when it has more than one choice.
 export default function FilterPanel({ options, filters, onToggle }) {
   return (
     <div>
-      <Group title="Fabric">
-        {options.fabric.map((f) => (
-          <Option key={f} checked={filters.fabric.includes(f)} onChange={() => onToggle('fabric', f)}>
-            {f}
-          </Option>
-        ))}
-      </Group>
+      {options.type.length > 1 && (
+        <Group title="Type">
+          {options.type.map((t) => (
+            <Option key={t.id} checked={filters.type.includes(t.id)} onChange={() => onToggle('type', t.id)}>
+              {t.label}
+            </Option>
+          ))}
+        </Group>
+      )}
 
-      <Group title="Colour">
-        {options.color.map((c) => (
-          <Option key={c} checked={filters.color.includes(c)} onChange={() => onToggle('color', c)}>
-            <span className="size-4 rounded-full ring-1 ring-base-300" style={{ background: SWATCH[c] ?? '#ccc' }} />
-            {c}
-          </Option>
-        ))}
-      </Group>
+      {options.fabric.length > 1 && (
+        <Group title="Fabric">
+          {options.fabric.map((f) => (
+            <Option key={f} checked={filters.fabric.includes(f)} onChange={() => onToggle('fabric', f)}>
+              {f}
+            </Option>
+          ))}
+        </Group>
+      )}
 
-      <Group title="Price">
-        {options.price.map((r) => (
-          <Option key={r.id} checked={filters.price.includes(r.id)} onChange={() => onToggle('price', r.id)}>
-            {r.label}
-          </Option>
-        ))}
-      </Group>
+      {options.color.length > 1 && (
+        <Group title="Colour">
+          {options.color.map((c) => (
+            <Option key={c} checked={filters.color.includes(c)} onChange={() => onToggle('color', c)}>
+              <span className="size-4 rounded-full ring-1 ring-base-300" style={{ background: SWATCH[c] ?? '#ccc' }} />
+              {c}
+            </Option>
+          ))}
+        </Group>
+      )}
+
+      {options.price.length > 1 && (
+        <Group title="Price">
+          {options.price.map((r) => (
+            <Option key={r.id} checked={filters.price.includes(r.id)} onChange={() => onToggle('price', r.id)}>
+              {r.label}
+            </Option>
+          ))}
+        </Group>
+      )}
     </div>
   )
 }

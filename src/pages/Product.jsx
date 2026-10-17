@@ -1,29 +1,56 @@
-import { HandHeart, MessageCircle, ShieldCheck, Truck } from 'lucide-react'
+import { HandHeart, MessageCircle, ShieldCheck, Sparkles, Truck } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import ProductGallery from '../components/product/ProductGallery.jsx'
 import StickyBuyBar from '../components/product/StickyBuyBar.jsx'
 import { CatalogNotice } from '../components/ui/CatalogState.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
+import Price from '../components/ui/Price.jsx'
 import ProductCard from '../components/ui/ProductCard.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import SectionHeading from '../components/ui/SectionHeading.jsx'
+import WishlistButton from '../components/ui/WishlistButton.jsx'
 import { BRAND, EXCHANGE_POLICY } from '../config/brand.js'
 import { JAMDANI_SPECS } from '../config/jamdani.js'
 import { useCart } from '../context/cart.js'
 import { useCatalog } from '../context/catalog.js'
-import { collections } from '../data/collections.js'
+import { useSite } from '../context/site.js'
 import { deliveryRows } from '../utils/contact.js'
-import { formatPrice } from '../utils/formatPrice.js'
 import { isSoldOut } from '../utils/product.js'
 import { productWhatsappMessage, whatsappLink } from '../utils/whatsapp.js'
 import NotFound from './NotFound.jsx'
 
-const ASSURANCES = [
-  { icon: Truck, text: 'Cash on delivery across Bangladesh' },
-  { icon: HandHeart, text: 'Handwoven on a traditional loom' },
-  { icon: ShieldCheck, text: 'Authenticity guaranteed' },
-]
+const ASSURANCES = {
+  saree: [
+    { icon: Truck, text: 'Cash on delivery across Bangladesh' },
+    { icon: HandHeart, text: 'Handwoven on a traditional loom' },
+    { icon: ShieldCheck, text: 'Authenticity guaranteed' },
+  ],
+  general: [
+    { icon: Truck, text: 'Cash on delivery across Bangladesh' },
+    { icon: HandHeart, text: 'Handmade by Bangladeshi artisans' },
+    { icon: ShieldCheck, text: 'Authenticity guaranteed' },
+  ],
+}
+
+// The rows under "Details". Saris share the loom specs; other products use the admin's detail rows.
+function detailRows(product, isSaree) {
+  if (!isSaree) {
+    return [
+      ...(product.origin ? [['Origin', `${product.origin}, Bangladesh`]] : []),
+      ...(product.color ? [['Colour', product.color]] : []),
+      ...(product.details ?? []).map((d) => [d.label, d.value]),
+    ]
+  }
+  return [
+    ['Origin', `${product.origin}, Bangladesh`],
+    ['Fabric', [product.fabric, product.count && `${product.count} count`].filter(Boolean).join(', ')],
+    ['Length', JAMDANI_SPECS.length],
+    ['Width', JAMDANI_SPECS.width],
+    ['Blouse piece', JAMDANI_SPECS.blouse],
+    ...(product.weavingTime ? [['Weaving time', product.weavingTime]] : []),
+  ]
+}
 
 function Accordion({ title, children, open = false }) {
   return (
@@ -87,13 +114,17 @@ export default function Product() {
   const { products, status, getProduct } = useCatalog()
   const product = getProduct(slug)
   const cart = useCart()
+  const { getCategory, campaign } = useSite()
   const buyRef = useRef(null)
   const showStickyBar = useOutOfView(buyRef)
 
   if (!product && status !== 'ready') return <ProductSkeleton failed={status === 'error'} />
   if (!product) return <NotFound />
 
-  const collection = collections[product.category]
+  const category = getCategory(product.category)
+  // Saris unless the category says otherwise, so a saved copy without categories still looks right.
+  const isSaree = (category?.template ?? 'saree') === 'saree'
+  const onSale = product.salePrice !== undefined
   const inCart = cart.lines.find((l) => l.slug === product.slug)?.qty ?? 0
   const soldOut = isSoldOut(product)
   const soldOutForYou = soldOut || inCart >= product.stock
@@ -121,7 +152,7 @@ export default function Product() {
                 </Link>
                 {' / '}
                 <Link to={`/collections/${product.category}`} className="hover:underline">
-                  {collection?.title}
+                  {category?.name}
                 </Link>
               </nav>
 
@@ -130,11 +161,15 @@ export default function Product() {
               <p className="mt-1 font-bangla text-primary">{product.nameBangla}</p>
 
               <p className="mt-4 text-xl">
-                {formatPrice(product.price)}
-                {product.compareAt && (
-                  <span className="ml-3 text-base line-through opacity-50">{formatPrice(product.compareAt)}</span>
-                )}
+                <Price product={product} showPercent />
               </p>
+              {onSale && campaign && (
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-primary">
+                  <Sparkles size={13} strokeWidth={1.5} /> {campaign.title}
+                  {' · ends '}
+                  {new Date(campaign.endsAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })}
+                </p>
+              )}
               <p className="mt-1 text-xs tracking-wide opacity-60">
                 {soldOut
                   ? 'Sold out · message us on WhatsApp for a similar piece'
@@ -146,11 +181,13 @@ export default function Product() {
               <JamdaniDivider className="my-6 justify-start" />
 
               <p className="leading-relaxed opacity-85">{product.description}</p>
-              <p className="mt-4 text-sm">
-                <span className="opacity-60">Fabric</span> {product.fabric} · {product.count} count
-                <span className="mx-2 opacity-30">|</span>
-                <span className="opacity-60">Colour</span> {product.color}
-              </p>
+              {isSaree && (
+                <p className="mt-4 text-sm">
+                  <span className="opacity-60">Fabric</span> {product.fabric} · {product.count} count
+                  <span className="mx-2 opacity-30">|</span>
+                  <span className="opacity-60">Colour</span> {product.color}
+                </p>
+              )}
 
               <div ref={buyRef} className="mt-8 grid gap-3">
                 <button
@@ -169,10 +206,11 @@ export default function Product() {
                 >
                   <MessageCircle size={18} strokeWidth={1.5} /> Order on WhatsApp
                 </a>
+                <WishlistButton product={product} variant="inline" />
               </div>
 
               <ul className="mt-6 grid gap-2 text-sm">
-                {ASSURANCES.map(({ icon: Icon, text }) => (
+                {ASSURANCES[isSaree ? 'saree' : 'general'].map(({ icon: Icon, text }) => (
                   <li key={text} className="flex items-center gap-3 opacity-80">
                     <Icon size={18} strokeWidth={1.2} className="text-secondary" /> {text}
                   </li>
@@ -181,33 +219,30 @@ export default function Product() {
 
               <div className="mt-8 border-t border-base-300">
                 <Accordion title="Details & size" open>
-                  <Specs
-                    rows={[
-                      ['Origin', `${product.origin}, Bangladesh`],
-                      ['Fabric', `${product.fabric}, ${product.count} count`],
-                      ['Length', JAMDANI_SPECS.length],
-                      ['Width', JAMDANI_SPECS.width],
-                      ['Blouse piece', JAMDANI_SPECS.blouse],
-                      ['Weaving time', product.weavingTime],
-                    ]}
-                  />
+                  <Specs rows={detailRows(product, isSaree)} />
                   <p className="mt-4 italic">
-                    Small irregularities in the weave are the signature of a hand loom, not flaws.
+                    {isSaree
+                      ? 'Small irregularities in the weave are the signature of a hand loom, not flaws.'
+                      : 'Each piece is made by hand, so small differences from the photos are part of its character.'}
                   </p>
                 </Accordion>
-                <Accordion title="The weaver's story">
-                  <p>
-                    Woven by a {product.weaver.charAt(0).toLowerCase() + product.weaver.slice(1)}. Every motif in this
-                    sari was laid into the cloth by hand, one thread at a time, over {product.weavingTime.toLowerCase()}.
-                  </p>
-                </Accordion>
-                <Accordion title="Care guide">
-                  <ul className="list-disc space-y-1 pl-5">
-                    {JAMDANI_SPECS.care.map((tip) => (
-                      <li key={tip}>{tip}</li>
-                    ))}
-                  </ul>
-                </Accordion>
+                {isSaree && product.weaver && product.weavingTime && (
+                  <Accordion title="The weaver's story">
+                    <p>
+                      Woven by a {product.weaver.charAt(0).toLowerCase() + product.weaver.slice(1)}. Every motif in this
+                      sari was laid into the cloth by hand, one thread at a time, over {product.weavingTime.toLowerCase()}.
+                    </p>
+                  </Accordion>
+                )}
+                {isSaree && (
+                  <Accordion title="Care guide">
+                    <ul className="list-disc space-y-1 pl-5">
+                      {JAMDANI_SPECS.care.map((tip) => (
+                        <li key={tip}>{tip}</li>
+                      ))}
+                    </ul>
+                  </Accordion>
+                )}
                 <Accordion title="Delivery & exchange">
                   <Specs
                     rows={[
@@ -229,7 +264,7 @@ export default function Product() {
       {related.length > 0 && (
         <section className="border-t border-base-300 bg-base-200">
           <div className="mx-auto max-w-7xl px-4 py-16 md:px-8 md:py-24">
-            <SectionHeading eyebrow="You may also love" title="More from the loom" />
+            <SectionHeading eyebrow="You may also love" title={isSaree ? 'More from the loom' : `More ${category?.name ?? 'pieces'}`} />
             <div className="mt-10 grid grid-cols-2 gap-x-3 gap-y-10 md:gap-x-6 lg:grid-cols-4">
               {related.map((p, i) => (
                 <Reveal key={p.slug} delay={i * 0.08}>

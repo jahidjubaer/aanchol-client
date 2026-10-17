@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
-import { formatPrice } from '../../utils/formatPrice.js'
 import { imageSrc, imageSrcSet } from '../../utils/image.js'
 import { getSubtitle } from '../../utils/product.js'
+import Price from '../ui/Price.jsx'
 import WovenImage from '../ui/WovenImage.jsx'
 import QtyStepper from './QtyStepper.jsx'
 
@@ -38,7 +38,7 @@ export default function CartLine({ item, onQty, onRemove, onNavigate, compact = 
           >
             {product.name}
           </Link>
-          <p className="shrink-0 text-sm">{formatPrice(product.price * qty)}</p>
+          <Price product={product} qty={qty} className="shrink-0 text-right text-sm" />
         </div>
         <p className="mt-0.5 text-xs opacity-60">{getSubtitle(product)}</p>
 
