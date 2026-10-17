@@ -1,6 +1,7 @@
 // How order statuses read to customers (the admin uses its own wording in adminFormat.js).
 export const CUSTOMER_STATUS = {
   pending: { label: 'Order received', note: 'We will call you to confirm.', className: 'bg-secondary/15 text-secondary border-secondary/40' },
+  checking: { label: 'Checking payment', note: "We're checking your bKash/Nagad payment, then we'll call to confirm.", className: 'bg-warning/10 text-warning border-warning/40' },
   confirmed: { label: 'Confirmed', note: 'Your piece is being wrapped.', className: 'bg-primary/10 text-primary border-primary/30' },
   shipped: { label: 'On the way', note: 'With the courier now.', className: 'bg-info/10 text-info border-info/30' },
   delivered: { label: 'Delivered', note: 'We hope you love it.', className: 'bg-accent/10 text-accent border-accent/30' },
@@ -8,6 +9,10 @@ export const CUSTOMER_STATUS = {
 }
 
 export const ORDER_STEPS = ['pending', 'confirmed', 'shipped', 'delivered']
+
+// A new order whose bKash/Nagad advance the shop hasn't found yet reads "Checking payment".
+export const customerStatus = (order) =>
+  order.status === 'pending' && order.payment?.advance > 0 && !order.payment.verified ? 'checking' : order.status
 
 const DATE = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'Asia/Dhaka' })
 const DATE_TIME = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit', timeZone: 'Asia/Dhaka' })

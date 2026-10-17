@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import GiftOptions from '../components/checkout/GiftOptions.jsx'
 import OrderSummary from '../components/checkout/OrderSummary.jsx'
+import PaymentOptions from '../components/checkout/PaymentOptions.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import { BRAND, DELIVERY_OPTIONS } from '../config/brand.js'
 import { useAccount } from '../context/account.js'
@@ -14,6 +15,7 @@ import { placeOrder } from '../utils/api.js'
 import { validateCheckout } from '../utils/checkout.js'
 import { formatPrice } from '../utils/formatPrice.js'
 import { orderTotals } from '../utils/orderTotals.js'
+import { cleanTrxId, enabledWallets, requiredAdvance, TRX_ID, WALLETS } from '../utils/payments.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 const EMPTY_FORM = { name: '', phone: '', email: '', city: '', address: '', note: '', delivery: 'inside-dhaka' }
@@ -75,6 +77,8 @@ export default function Checkout() {
   const { membership, status: memberStatus, reload: reloadMembership } = useMembership()
   const [wrap, setWrap] = useState({ on: false, message: '' })
   const [card, setCard] = useState(null) // { code, balance } once applied
+  const wallets = enabledWallets(site.payments)
+  const [pay, setPay] = useState({ method: null, plan: 'advance', trxId: '', sender: '' })
 
   // Server errors appear next to the button at the bottom; bring them into view.
   useEffect(() => {
@@ -100,6 +104,20 @@ export default function Checkout() {
   }
   // A signed-in total isn't known until the member level has loaded.
   const waitingForMembership = memberStatus === 'loading'
+  // With bKash/Nagad on in the admin, an advance confirms the order; a gift card covering it all needs none.
+  const needsAdvance = wallets.length > 0 && total > 0
+  const advance = requiredAdvance(total, delivery.fee, site.payments.minAdvance)
+  const payNow = needsAdvance ? (pay.plan === 'full' ? total : advance) : 0
+  const payment = { ...pay, method: wallets.includes(pay.method) ? pay.method : wallets[0] }
+
+  // Checkout fields plus the payment ones.
+  const validate = (f) => {
+    const found = validateCheckout(f)
+    if (!needsAdvance) return found
+    if (!TRX_ID.test(cleanTrxId(pay.trxId))) found.trxId = `Enter the TrxID from your ${WALLETS[payment.method].label} message, e.g. 8N7A6B5C4D.`
+    if (pay.sender && !/^(?:\+?88)?01[3-9]\d{8}$/.test(pay.sender.replace(/[\s-]/g, ''))) found.sender = 'Enter the number you sent from, e.g. 01712345678.'
+    return found
+  }
 
   if (!ready && lines.length > 0) {
     return (
@@ -124,13 +142,13 @@ export default function Checkout() {
   const set = (key) => (e) => {
     const next = { ...form, [key]: e.target.value }
     setForm(next)
-    if (touched) setErrors(validateCheckout(next))
+    if (touched) setErrors(validate(next))
   }
 
   const submit = async (e) => {
     e.preventDefault()
     if (submitting || waitingForMembership) return
-    const found = validateCheckout(form)
+    const found = validate(form)
     setErrors(found)
     setTouched(true)
     setFormError(null)
@@ -152,6 +170,9 @@ export default function Checkout() {
           ...(memberStatus !== 'error' ? { expectedTotal: totals.beforeCard } : {}),
           ...(wrapOn ? { giftWrap: { message: wrap.message } } : {}),
           ...(card ? { giftCard: card.code } : {}),
+          ...(needsAdvance
+            ? { payment: { method: payment.method, plan: pay.plan, trxId: cleanTrxId(pay.trxId), sender: pay.sender || form.phone, amount: payNow } }
+            : {}),
         },
         account.token,
       )
@@ -360,22 +381,32 @@ export default function Checkout() {
             </Section>
 
             <Section step="04" title="Payment">
-              <div className="grid gap-3">
+              {needsAdvance ? (
+                <PaymentOptions
+                  payments={site.payments}
+                  wallets={wallets}
+                  value={payment}
+                  onChange={(next) => {
+                    setPay(next)
+                    if (touched) setErrors((e) => ({ ...e, trxId: undefined, sender: undefined, paymentMethod: undefined }))
+                  }}
+                  errors={errors}
+                  advance={advance}
+                  toPay={total}
+                  deliveryFee={delivery.fee}
+                  phone={form.phone}
+                />
+              ) : (
                 <label className="flex items-start gap-3 border border-primary bg-primary/5 p-4">
                   <input type="radio" checked readOnly className="radio radio-sm radio-primary mt-0.5" />
                   <span>
-                    <span className="block text-sm">Cash on delivery</span>
+                    <span className="block text-sm">{total === 0 ? 'Nothing to pay' : 'Cash on delivery'}</span>
                     <span className="block text-xs opacity-60">
-                      {card && total === 0 ? 'Nothing to pay: your gift card covers it all.' : 'Pay in cash when your sari arrives.'}
+                      {total === 0 ? 'Your gift card covers it all.' : 'Pay in cash when your sari arrives.'}
                     </span>
                   </span>
                 </label>
-                <div className="flex items-center gap-3 border border-base-300 p-4 opacity-50">
-                  <input type="radio" disabled className="radio radio-sm" />
-                  <span className="text-sm">bKash · Nagad · Card</span>
-                  <span className="ml-auto text-[10px] uppercase tracking-[0.2em]">Coming soon</span>
-                </div>
-              </div>
+              )}
             </Section>
 
             <div className="pt-8">
@@ -405,11 +436,12 @@ export default function Checkout() {
                     <span className="loading loading-spinner loading-sm" /> Placing order
                   </>
                 ) : (
-                  <>Place order · {formatPrice(total)}</>
+                  <>{needsAdvance ? `Place order · ${formatPrice(payNow)} sent` : `Place order · ${formatPrice(total)}`}</>
                 )}
               </button>
               <p className="mt-3 flex items-center justify-center gap-2 text-xs opacity-60">
-                <Lock size={12} /> We'll call to confirm your order before dispatch.
+                <Lock size={12} />{' '}
+                {needsAdvance ? `Send ${formatPrice(payNow)} first, then place the order. We'll check it and call to confirm.` : "We'll call to confirm your order before dispatch."}
               </p>
             </div>
           </form>

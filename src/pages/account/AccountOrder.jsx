@@ -3,11 +3,12 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router'
 import { ItemThumbs, StatusPill } from '../../components/account/OrderBits.jsx'
 import OrderExtras from '../../components/checkout/OrderExtras.jsx'
+import PaymentStatus from '../../components/checkout/PaymentStatus.jsx'
 import { BRAND } from '../../config/brand.js'
 import { useAccount } from '../../context/account.js'
 import { formatPrice } from '../../utils/formatPrice.js'
 import { paymentNote } from '../../utils/orderTotals.js'
-import { CUSTOMER_STATUS, ORDER_STEPS, orderDateTime } from '../../utils/orderStatus.js'
+import { CUSTOMER_STATUS, customerStatus, ORDER_STEPS, orderDateTime } from '../../utils/orderStatus.js'
 import { whatsappLink } from '../../utils/whatsapp.js'
 
 // Received → Confirmed → On the way → Delivered, with the date each step happened.
@@ -93,11 +94,11 @@ export default function AccountOrder() {
           <h2 className="text-3xl">{order.id}</h2>
           <p className="text-sm opacity-60">Placed {orderDateTime(order.placedAt)}</p>
         </div>
-        <StatusPill status={order.status} />
+        <StatusPill status={customerStatus(order)} />
       </div>
 
       <section className="border border-base-300 bg-base-100 p-5 md:p-6">
-        <p className="mb-5 text-sm opacity-80">{CUSTOMER_STATUS[order.status]?.note}</p>
+        <p className="mb-5 text-sm opacity-80">{CUSTOMER_STATUS[customerStatus(order)]?.note}</p>
         <Timeline order={order} />
       </section>
 
@@ -144,6 +145,7 @@ export default function AccountOrder() {
               <dd className="font-display text-2xl">{formatPrice(order.total)}</dd>
             </div>
           </dl>
+          <PaymentStatus order={order} className="mt-3 border-t border-base-300 pt-3" />
         </div>
 
         <div className="grid content-start gap-4">

@@ -100,4 +100,6 @@ export const DEFAULT_SITE = {
     { name: 'Diamond', min: 30000, percent: 12 },
   ],
   giftWrap: { enabled: true, fee: 100 },
+  // bKash / Nagad Send Money numbers, set in Admin → Settings. Off until then: plain cash on delivery.
+  payments: { bkash: { enabled: false, number: '' }, nagad: { enabled: false, number: '' }, minAdvance: 120 },
 }

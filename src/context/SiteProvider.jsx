@@ -71,6 +71,7 @@ export default function SiteProvider({ children }) {
       // A copy saved before these existed doesn't have them.
       memberTiers: current.memberTiers ?? DEFAULT_SITE.memberTiers,
       giftWrap: current.giftWrap ?? DEFAULT_SITE.giftWrap,
+      payments: current.payments ?? DEFAULT_SITE.payments,
       campaign: stillRunning(current.campaign),
       status: site ? 'ready' : failed ? 'error' : 'loading',
       fresh,

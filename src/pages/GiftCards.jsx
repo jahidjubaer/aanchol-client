@@ -6,8 +6,10 @@ import SectionHeading from '../components/ui/SectionHeading.jsx'
 import TextField from '../components/ui/TextField.jsx'
 import { BRAND } from '../config/brand.js'
 import { useAccount } from '../context/account.js'
+import { useSite } from '../context/site.js'
 import { request } from '../utils/api.js'
 import { formatPrice } from '../utils/formatPrice.js'
+import { enabledWallets, WALLETS } from '../utils/payments.js'
 import { whatsappLink } from '../utils/whatsapp.js'
 
 // Same limits as the server (config/shop.js).
@@ -16,10 +18,17 @@ const MIN = 500
 const MAX = 50000
 const MESSAGE_MAX = 200
 
-const PAYMENTS = [
-  { id: 'bkash', label: 'bKash', note: "We'll send our bKash number on WhatsApp. The card is sent as soon as the payment arrives." },
-  { id: 'cash', label: 'Cash', note: 'Pay at our shop, or our delivery person collects it. We call to arrange.' },
-]
+const CASH = { id: 'cash', label: 'Cash', note: 'Pay at our shop, or our delivery person collects it. We call to arrange.' }
+
+// bKash / Nagad when switched on in the admin (with the number to Send Money to), and cash.
+function paymentChoices(payments) {
+  const wallets = enabledWallets(payments).map((w) => ({
+    id: w,
+    label: WALLETS[w].label,
+    note: `Send Money to ${payments[w].number}, then message us the TrxID. The card is sent as soon as it arrives.`,
+  }))
+  return [...wallets, CASH]
+}
 
 function BalanceCheck() {
   const [code, setCode] = useState('')
@@ -70,15 +79,17 @@ function BalanceCheck() {
 
 export default function GiftCards() {
   const { customer, token } = useAccount()
+  const PAYMENTS = paymentChoices(useSite().payments)
   const [amount, setAmount] = useState(3000)
   const [custom, setCustom] = useState('')
-  const [form, setForm] = useState({ recipientName: '', recipientPhone: '', message: '', buyerName: customer?.name ?? '', buyerPhone: customer?.phone ?? '', paymentMethod: 'bkash' })
+  const [form, setForm] = useState({ recipientName: '', recipientPhone: '', message: '', buyerName: customer?.name ?? '', buyerPhone: customer?.phone ?? '', paymentMethod: '' })
   const [errors, setErrors] = useState({})
   const [busy, setBusy] = useState(false)
   const [problem, setProblem] = useState(null)
   const [done, setDone] = useState(null) // the card, once ordered
 
   const value = custom ? Number(custom) : amount
+  const paymentMethod = PAYMENTS.some((p) => p.id === form.paymentMethod) ? form.paymentMethod : PAYMENTS[0].id
   const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }))
 
   const submit = async (e) => {
@@ -88,7 +99,7 @@ export default function GiftCards() {
     setProblem(null)
     try {
       const headers = token ? { Authorization: `Bearer ${token}` } : {}
-      const { giftCard } = await request('/api/gift-cards', { method: 'POST', headers, body: JSON.stringify({ ...form, amount: value }) })
+      const { giftCard } = await request('/api/gift-cards', { method: 'POST', headers, body: JSON.stringify({ ...form, paymentMethod, amount: value }) })
       setDone(giftCard)
       window.scrollTo({ top: 0, behavior: 'smooth' })
     } catch (err) {
@@ -100,7 +111,7 @@ export default function GiftCards() {
   }
 
   if (done) {
-    const method = PAYMENTS.find((p) => p.id === done.paymentMethod)
+    const method = PAYMENTS.find((p) => p.id === done.paymentMethod) ?? CASH
     const message = `Hello ${BRAND.name}, I ordered a gift card ${done.reference} for ${formatPrice(done.amount)}. I'd like to pay by ${method.label}.`
     return (
       <div className="mx-auto max-w-xl px-4 py-16 text-center md:py-24">
@@ -202,8 +213,8 @@ export default function GiftCards() {
               <legend className="eyebrow mb-3">How you'll pay</legend>
               <div className="grid gap-3 sm:grid-cols-2">
                 {PAYMENTS.map((p) => (
-                  <label key={p.id} className={`flex cursor-pointer items-start gap-3 border p-4 transition ${form.paymentMethod === p.id ? 'border-primary bg-primary/5' : 'border-base-300'}`}>
-                    <input type="radio" name="paymentMethod" value={p.id} checked={form.paymentMethod === p.id} onChange={set('paymentMethod')} className="radio radio-sm radio-primary mt-0.5" />
+                  <label key={p.id} className={`flex cursor-pointer items-start gap-3 border p-4 transition ${paymentMethod === p.id ? 'border-primary bg-primary/5' : 'border-base-300'}`}>
+                    <input type="radio" name="paymentMethod" value={p.id} checked={paymentMethod === p.id} onChange={set('paymentMethod')} className="radio radio-sm radio-primary mt-0.5" />
                     <span>
                       <span className="block text-sm">{p.label}</span>
                       <span className="block text-xs opacity-60">{p.note}</span>

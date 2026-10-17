@@ -23,7 +23,12 @@ export function orderWhatsappMessage(order) {
     `Delivery: ${order.delivery.label} (${formatPrice(order.delivery.fee)})`,
     ...(order.giftWrap ? [`Gift wrap (${formatPrice(order.giftWrap.fee)})${order.giftWrap.message ? `: "${order.giftWrap.message}"` : ''}`] : []),
     ...(order.giftCard ? [`Gift card: −${formatPrice(order.giftCard.amount)}`] : []),
-    `${order.giftCard ? 'To pay' : 'Total'}: ${formatPrice(order.total)} · Cash on delivery`,
+    `${order.giftCard ? 'To pay' : 'Total'}: ${formatPrice(order.total)}`,
+    ...(order.payment?.advance > 0
+      ? [
+          `Sent ${formatPrice(order.payment.advance)} by ${order.payment.method === 'bkash' ? 'bKash' : 'Nagad'} (TrxID ${order.payment.trxId}), ${formatPrice(order.total - order.payment.advance)} on delivery`,
+        ]
+      : ['Cash on delivery']),
     `Name: ${order.customer.name}`,
     `Phone: ${order.customer.phone}`,
     `Address: ${order.customer.address}, ${order.customer.city}`,

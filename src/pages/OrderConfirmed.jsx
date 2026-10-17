@@ -1,6 +1,7 @@
 import { CircleCheck, MessageCircle } from 'lucide-react'
 import { Link, Navigate, useLocation } from 'react-router'
 import OrderExtras from '../components/checkout/OrderExtras.jsx'
+import PaymentStatus from '../components/checkout/PaymentStatus.jsx'
 import JamdaniDivider from '../components/ui/JamdaniDivider.jsx'
 import Reveal from '../components/ui/Reveal.jsx'
 import { BRAND } from '../config/brand.js'
@@ -59,6 +60,7 @@ export default function OrderConfirmed() {
           </span>
           <span className="whitespace-nowrap font-display text-2xl">{formatPrice(order.total)}</span>
         </div>
+        <PaymentStatus order={order} className="mt-4 border-t border-base-300 pt-4" />
         <p className="mt-4 opacity-70">
           {order.customer.address}, {order.customer.city}
         </p>

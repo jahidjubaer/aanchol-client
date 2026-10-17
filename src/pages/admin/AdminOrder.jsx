@@ -17,6 +17,7 @@ import {
 } from '../../utils/adminFormat.js'
 import { formatPrice } from '../../utils/formatPrice.js'
 import { paymentNote } from '../../utils/orderTotals.js'
+import { dueOnDelivery, WALLETS } from '../../utils/payments.js'
 
 function Card({ title, children, className = '' }) {
   return (
@@ -24,6 +25,59 @@ function Card({ title, children, className = '' }) {
       {title && <h2 className="eyebrow mb-4">{title}</h2>}
       {children}
     </section>
+  )
+}
+
+// The bKash/Nagad advance: what to look for in the shop's account, and the button once it's found.
+function PaymentCheck({ order, onChange }) {
+  const { payment } = order
+  const wallet = WALLETS[payment?.method]
+  if (!wallet || !(payment.advance > 0)) return null
+  const due = dueOnDelivery(order)
+  const refund = order.status === 'cancelled' && payment.verified
+
+  return (
+    <Card title="Payment" className={order.paymentToCheck ? 'border-warning/60' : ''}>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="flex items-center gap-2 font-display text-2xl">
+            <span className="size-2.5 rounded-full" style={{ background: wallet.color }} aria-hidden="true" />
+            {formatPrice(payment.advance)} by {wallet.label}
+          </p>
+          <p className="mt-1 text-sm">
+            TrxID <span className="font-mono tracking-wider">{payment.trxId}</span> · from {payment.sender}
+          </p>
+          <p className="text-xs opacity-60">
+            {payment.plan === 'full' ? 'Paid in full' : `Advance · collect ${formatPrice(due)} on delivery`}
+          </p>
+        </div>
+        {payment.verified && (
+          <span className="shrink-0 border border-accent/50 bg-accent/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] text-accent">Received</span>
+        )}
+      </div>
+      {order.paymentToCheck && order.status !== 'cancelled' && (
+        <div className="mt-4 border-t border-base-300 pt-4">
+          <p className="text-sm">
+            Open your {wallet.label} account and look for <strong className="font-normal">{formatPrice(payment.advance)}</strong> from{' '}
+            <strong className="font-normal">{payment.sender}</strong> with TrxID <strong className="font-mono font-normal">{payment.trxId}</strong>.
+          </p>
+          <button type="button" onClick={() => onChange({ paymentVerified: true })} className="btn btn-accent mt-3">
+            <Check size={16} /> Payment received
+          </button>
+          <p className="mt-2 text-xs opacity-60">Not there? Call or WhatsApp the customer. If it never arrives, cancel the order.</p>
+        </div>
+      )}
+      {payment.verified && (
+        <p className="mt-3 text-xs opacity-60">
+          Checked by {order.paymentVerifiedBy ?? 'the admin'} · {formatDateTime(payment.verifiedAt)}
+        </p>
+      )}
+      {refund && (
+        <p className="mt-3 border-l-2 border-error bg-error/5 p-3 text-sm">
+          This order was cancelled: send {formatPrice(payment.advance)} back to {payment.sender} by {wallet.label}.
+        </p>
+      )}
+    </Card>
   )
 }
 
@@ -56,18 +110,21 @@ function Actions({ order, onChange }) {
     )
   }
 
+  const waiting = order.paymentToCheck
   return (
-    <div className="grid gap-3 sm:flex sm:flex-wrap">
+    <div className="grid gap-3 sm:flex sm:flex-wrap sm:items-center">
       {forward.map((s) => (
         <button
           key={s}
           type="button"
+          disabled={s === 'confirmed' && waiting}
           onClick={() => onChange({ status: s })}
           className="btn btn-primary uppercase tracking-[0.2em] sm:px-8"
         >
           <Check size={16} /> {ACTION_LABEL[s]}
         </button>
       ))}
+      {waiting && <p className="text-xs opacity-70 sm:max-w-56">Check the payment below first.</p>}
       {canCancel && (
         <button type="button" onClick={() => setConfirmCancel(true)} className="btn btn-ghost text-error">
           {ACTION_LABEL.cancelled}
@@ -187,6 +244,8 @@ export default function AdminOrder() {
             </p>
           )}
         </Card>
+
+        <PaymentCheck order={order} onChange={change} />
 
         <Card title="Customer">
           <p className="font-display text-2xl">{customer.name}</p>

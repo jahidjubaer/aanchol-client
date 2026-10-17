@@ -5,7 +5,7 @@ import { ItemThumbs, StatusPill } from '../../components/account/OrderBits.jsx'
 import TextField from '../../components/ui/TextField.jsx'
 import { useAccount } from '../../context/account.js'
 import { formatPrice } from '../../utils/formatPrice.js'
-import { orderDate } from '../../utils/orderStatus.js'
+import { customerStatus, orderDate } from '../../utils/orderStatus.js'
 
 function ClaimOrder({ onClaimed }) {
   const { call } = useAccount()
@@ -109,7 +109,7 @@ export default function AccountOrders() {
                 <div className="min-w-0 flex-1">
                   <p className="flex flex-wrap items-center gap-2">
                     <span className="font-display text-lg">{o.id}</span>
-                    <StatusPill status={o.status} />
+                    <StatusPill status={customerStatus(o)} />
                   </p>
                   <p className="mt-0.5 truncate text-sm opacity-70">{o.items.map((i) => i.name).join(', ')}</p>
                   <p className="text-xs opacity-60">

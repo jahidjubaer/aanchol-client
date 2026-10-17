@@ -24,7 +24,7 @@ function codeMessage(card, toRecipient) {
 }
 
 function paymentMessage(card) {
-  const how = card.payment.method === 'bkash' ? 'by bKash to our number' : 'in cash'
+  const how = { bkash: 'by bKash Send Money', nagad: 'by Nagad Send Money' }[card.payment.method] ?? 'in cash'
   return `Hello ${card.buyer?.name?.split(' ')[0] ?? ''}, thank you for ordering a ${BRAND.name} gift card (${card.reference}) for ${formatPrice(card.amount)}. Please pay ${how}; we'll send the code as soon as it arrives.`
 }
 
@@ -103,7 +103,7 @@ export default function AdminGiftCard() {
       {card.status === 'pending' && (
         <Section title="Waiting for payment">
           <p className="text-sm">
-            {card.buyer?.name} will pay <strong className="font-normal">{formatPrice(card.amount)}</strong> by {card.payment.method === 'bkash' ? 'bKash' : 'cash'}. Once the money
+            {card.buyer?.name} will pay <strong className="font-normal">{formatPrice(card.amount)}</strong> by {{ bkash: 'bKash', nagad: 'Nagad' }[card.payment.method] ?? 'cash'}. Once the money
             arrives, activate the card: it gets its code and is valid for a year.
           </p>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">

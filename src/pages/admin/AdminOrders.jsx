@@ -35,6 +35,9 @@ function OrderRow({ order }) {
             <span className="text-sm tracking-[0.12em]">{order.id}</span>
             <StatusBadge status={order.status} />
             {order.sample && <SampleBadge />}
+            {order.paymentToCheck && (
+              <span className="border border-warning/50 bg-warning/10 px-2 py-0.5 text-[10px] uppercase tracking-[0.15em] text-warning">Payment to check</span>
+            )}
             {order.giftWrap && (
               <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.15em] text-secondary">
                 <Gift size={12} strokeWidth={1.5} /> Gift wrap
@@ -93,7 +96,8 @@ export default function AdminOrders() {
   }, [search, q, params, setParams])
 
   const counts = data?.counts ?? {}
-  const allCount = Object.values(counts).reduce((a, b) => a + b, 0)
+  // counts.payment overlaps the status counts, so it's left out of All.
+  const allCount = STATUS_TABS.reduce((n, s) => n + (counts[s] ?? 0), 0)
 
   return (
     <div className="mx-auto max-w-5xl pb-16">
@@ -130,6 +134,11 @@ export default function AdminOrders() {
         <Tab active={!status} onClick={() => update({ status: '' })}>
           All <span className="opacity-60">{allCount}</span>
         </Tab>
+        {counts.payment > 0 && (
+          <Tab active={status === 'payment'} onClick={() => update({ status: 'payment' })}>
+            <span className="text-warning">Payment to check</span> <span className="opacity-60">{counts.payment}</span>
+          </Tab>
+        )}
         {STATUS_TABS.map((s) => (
           <Tab key={s} active={status === s} onClick={() => update({ status: s })}>
             {STATUS[s].label} <span className="opacity-60">{counts[s] ?? 0}</span>

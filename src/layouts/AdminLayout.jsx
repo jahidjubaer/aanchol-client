@@ -7,18 +7,18 @@ import AdminAuthProvider from '../context/AdminAuthProvider.jsx'
 import { useAdminData } from '../hooks/useAdminData.js'
 
 const SECTIONS = [
-  { to: '/admin', label: 'Orders', match: (p) => p === '/admin' || p.startsWith('/admin/orders') },
+  { to: '/admin', label: 'Orders', badge: 'payments', match: (p) => p === '/admin' || p.startsWith('/admin/orders') },
   { to: '/admin/products', label: 'Products', match: (p) => p.startsWith('/admin/products') },
   { to: '/admin/customers', label: 'Customers', match: (p) => p.startsWith('/admin/customers') },
   { to: '/admin/gift-cards', label: 'Gift cards', badge: 'giftCards', match: (p) => p.startsWith('/admin/gift-cards') },
   { to: '/admin/restock', label: 'Restock', badge: 'restock', match: (p) => p.startsWith('/admin/restock') },
-  { to: '/admin/rewards', label: 'Rewards', match: (p) => p.startsWith('/admin/rewards') },
+  { to: '/admin/settings', label: 'Settings', match: (p) => p.startsWith('/admin/settings') },
   { to: '/admin/home', label: 'Home page', match: (p) => p.startsWith('/admin/home') },
   { to: '/admin/campaigns', label: 'Campaigns', match: (p) => p.startsWith('/admin/campaigns') },
   { to: '/admin/categories', label: 'Categories', match: (p) => p.startsWith('/admin/categories') },
 ]
 
-// Tabs, with counts of what needs doing: gift cards waiting for payment, people to tell about restocks.
+// Tabs, with counts of what needs doing: payments to check, gift cards waiting for payment, people to tell about restocks.
 // Checked again on every page change.
 function SectionTabs() {
   const location = useLocation()

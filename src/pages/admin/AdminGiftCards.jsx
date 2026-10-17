@@ -94,7 +94,7 @@ export default function AdminGiftCards() {
                   <p className="text-xs opacity-60">
                     {c.reference} · {formatDate(c.createdAt)}
                     {c.state === 'active' && ` · ${formatPrice(c.balance)} left`}
-                    {c.payment?.method && !c.payment.paid && ` · pays by ${c.payment.method === 'bkash' ? 'bKash' : 'cash'}`}
+                    {c.payment?.method && !c.payment.paid && ` · pays by ${{ bkash: 'bKash', nagad: 'Nagad' }[c.payment.method] ?? 'cash'}`}
                   </p>
                 </div>
                 <ChevronRight size={16} className="shrink-0 opacity-40" />
